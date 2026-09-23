@@ -1,14 +1,44 @@
+import {
+  dataResult,
+  emptyResult,
+  errorResult,
+  isRecord,
+  type FetchResult,
+} from "../utils/fetchResult";
+import { fetchJson } from "../utils/fetchJson";
+
 const trackingIndexBlackList = ["短融", "城投", "债", "信用"];
 
 interface OriginalEtf {
   securityName: string;
   securityCode: string;
-  scale: number;
+  scale: number | null;
   trackingIndex: string | null;
   trackIndex: string | null;
 }
-export const fetchEtfs = async () => {
-  const res = await fetch(
+
+export interface EtfRecord {
+  code: string;
+  name: string;
+  scale: number;
+  trackingIndex: string;
+  trackIndex: string | null;
+}
+
+function isOriginalEtf(value: unknown): value is OriginalEtf {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.securityName === "string" &&
+    typeof value.securityCode === "string" &&
+    (value.scale === null || typeof value.scale === "number") &&
+    (value.trackingIndex === null ||
+      typeof value.trackingIndex === "string") &&
+    (value.trackIndex === null || typeof value.trackIndex === "string")
+  );
+}
+
+export async function fetchEtfs(): Promise<FetchResult<EtfRecord[]>> {
+  const response = await fetchJson(
     "https://hongsehuojian.com/fundex-quote/allPage/findListByEtf?classA=&classB=&orderBy=l.scale&order=desc&searchValue=&isSelected=&pageNo=1&pageSize=2000&position=",
     {
       headers: {
@@ -17,56 +47,61 @@ export const fetchEtfs = async () => {
         "cache-control": "no-cache",
         pragma: "no-cache",
         pro: "RedRocket-PC",
-        "sec-ch-ua":
-          '"Not=A?Brand";v="99", "Google Chrome";v="151", "Chromium";v="151"',
-        "sec-ch-ua-mobile": "?0",
-        "sec-ch-ua-platform": '"macOS"',
         "sec-fetch-dest": "empty",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
       },
-      body: null,
       method: "GET",
     },
+    45_000,
   );
-  const ret = (await res.json()) as {
-    data: {
-      data: OriginalEtf[];
-    };
-  };
+  if (response.kind !== "data") return response;
 
-  const data = ret.data.data
-    // 过滤掉没有跟踪指数的 ETF
+  const body = response.data.body;
+  if (
+    !isRecord(body) ||
+    !isRecord(body.data) ||
+    !Array.isArray(body.data.data)
+  ) {
+    return errorResult("schema", "ETF 列表接口响应结构不正确", false);
+  }
+
+  const originalList = body.data.data;
+  if (originalList.length === 0) {
+    return emptyResult("ETF 列表为空", body);
+  }
+  if (!originalList.every(isOriginalEtf)) {
+    return errorResult("schema", "ETF 列表包含无法识别的记录", false);
+  }
+
+  const data = originalList
     .filter((etf) => etf.trackingIndex)
-    // 过滤掉规模小于 3 亿的 ETF
+    .filter(
+      (etf): etf is OriginalEtf & { scale: number } =>
+        typeof etf.scale === "number",
+    )
     .filter((etf) => etf.scale >= 300_000_000)
-    // 过滤 trackingIndex 黑名单
     .filter(
       (etf) =>
-        !trackingIndexBlackList.find((item) =>
+        !trackingIndexBlackList.some((item) =>
           etf.trackingIndex?.includes(item),
         ),
     )
-    .map((etf) => ({
-      securityName: etf.securityName,
-      securityCode: etf.securityCode,
-      scale: etf.scale,
-      trackingIndex: etf.trackingIndex,
-      trackIndex: etf.trackIndex,
-    }));
+    .map(
+      (etf): EtfRecord => ({
+        code: etf.securityCode,
+        name: etf.securityName,
+        scale: etf.scale,
+        trackingIndex: etf.trackingIndex!,
+        trackIndex: etf.trackIndex,
+      }),
+    );
 
-  // 同一跟踪标的的 ETF 只保留规模最大的一个
-  const grouped = data.reduce(
-    (acc, etf) => {
-      const key = etf.trackingIndex!;
+  const grouped = data.reduce<Record<string, EtfRecord>>((acc, etf) => {
+    const current = acc[etf.trackingIndex];
+    if (!current || current.scale < etf.scale) acc[etf.trackingIndex] = etf;
+    return acc;
+  }, {});
 
-      if (!acc[key] || acc[key].scale < etf.scale) {
-        acc[key] = etf;
-      }
-      return acc;
-    },
-    {} as Record<string, OriginalEtf>,
-  );
-  const list = Object.values(grouped);
-  return list;
-};
+  return dataResult(Object.values(grouped), body);
+}

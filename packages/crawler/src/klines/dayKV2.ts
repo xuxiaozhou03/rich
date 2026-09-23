@@ -1,31 +1,32 @@
-fetch(
-  "https://stock.cheesefortune.com/api/v4/dayKV2/159502SZ?t=17901455864346",
-  {
-    headers: {
-      accept: "*/*",
-      "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
-      "app-version": "",
-      "cache-control": "no-cache",
-      "content-type": "application/json;charset=utf-8",
-      devicetype: "ios",
-      expires: "-1",
-      pragma: "no-cache",
-      requestfrom: "wechat",
-      runtimetype: "unknown",
-      "sec-ch-ua":
-        '"Chromium";v="152", "Not?A_Brand";v="24", "Google Chrome";v="152"',
-      "sec-ch-ua-mobile": "?1",
-      "sec-ch-ua-platform": '"iOS"',
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-origin",
-      timestamp: "1790155864346",
-      token: "",
-      zstokv1: "c203c43363fbb32be211071cb32b9d9c",
-      Referer:
-        "https://stock.cheesefortune.com/security/etf/159502.SZ?blank=true",
-    },
-    body: null,
-    method: "GET",
-  },
-);
+import { fetchCheeseApi } from "../utils/fetchCheeseApi";
+import {
+  dataResult,
+  emptyResult,
+  errorResult,
+  type FetchResult,
+} from "../utils/fetchResult";
+import { obfuscateTimestamp } from "../utils/obfuscateTimestamp";
+import { buildDayKv2Klines, parseDayKv2Payload } from "./parsers";
+import type { KlineRecord } from "./types";
+
+export async function fetchDayKv2(
+  code = "159502.SZ",
+): Promise<FetchResult<KlineRecord[]>> {
+  const timestamp = Date.now();
+  const response = await fetchCheeseApi<unknown>({
+    timestamp,
+    url: `https://stock.cheesefortune.com/api/v4/dayKV2/${code.replace(".", "")}?t=${obfuscateTimestamp(timestamp)}`,
+    Referer: `https://stock.cheesefortune.com/security/etf/${code}?blank=true`,
+  });
+  if (response.kind !== "data") return response;
+
+  const payload = parseDayKv2Payload(response.data);
+  if (!payload) {
+    return errorResult("schema", "dayKV2 返回结构不正确", false);
+  }
+  if (payload.list.length === 0) {
+    return emptyResult("dayKV2 没有 K 线数据", response.raw);
+  }
+
+  return dataResult(buildDayKv2Klines(code, payload), response.raw);
+}

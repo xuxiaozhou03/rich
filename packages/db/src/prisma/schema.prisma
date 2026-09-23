@@ -1,5 +1,5 @@
-// 量化回测系统 Prisma Schema（骨架）
-// 模型：日K（Kline）/ 阶段收益（PeriodReturn）/ 标的基础信息（Security）/ 同步任务历史（SyncTaskRun）
+// 量化回测系统 Prisma Schema
+// 模型：ETF、关联关系、持仓、日K、subscribeShare 原始快照、同步任务状态
 
 generator client {
   provider = "prisma-client-js"
@@ -10,10 +10,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// 前复权日K线数据
+/// ETF基础信息
+model Etf {
+  code          String   @id
+  name          String
+  trackingIndex String
+  trackIndex    String?
+  scale         Float?
+  updatedAt     DateTime @updatedAt
+
+  @@map("etf")
+}
+
+/// ETF关联关系
+model LinkEtf {
+  target    String
+  source    String
+  similar   Float?
+  updatedAt DateTime @updatedAt
+
+  @@id([target, source])
+  @@index([source])
+  @@map("linkEtf")
+}
+
+/// ETF持仓
+model EtfHolding {
+  etfCode      String
+  securityCode String
+  name         String
+  holdScale    Float
+  updatedAt    DateTime @updatedAt
+
+  @@id([etfCode, securityCode])
+  @@map("etfHolding")
+}
+
+/// 日K线数据
 model Kline {
   code          String
-  date          Int // YYYYMMDD
+  date          Int
+  preClose      Float
   open          Float
   high          Float
   low           Float
@@ -22,40 +59,48 @@ model Kline {
   amount        Float
   change        Float
   changePercent Float
+  source        String
+  updatedAt     DateTime @updatedAt
 
-  @@unique([code, date])
-  @@index([code, date])
+  @@id([code, date])
+  @@index([code, source, date])
   @@map("kline")
 }
 
-/// ETF基础信息
-model Etf {
-  code          String @id
-  name          String
-  trackingIndex String
-  trackIndex    String
-  scale         Float?
+/// subscribeShare 原始快照
+model SubscribeShareSnapshot {
+  id             String   @id @default(cuid())
+  code           String
+  latestDate     Int
+  payload        String
+  payloadHash    String
+  firstFetchedAt DateTime @default(now())
+  lastFetchedAt  DateTime @default(now())
+  lastSeenAt     DateTime @default(now())
 
-  @@map("etf")
+  @@unique([code, latestDate])
+  @@index([code, latestDate])
+  @@map("subscribeShareSnapshot")
 }
 
-/// 相似度
-model LinkEtf {
-  target  String
-  source  String
-  similar Float?
+/// 同步任务状态
+model SyncTask {
+  taskKey             String    @id
+  status              String
+  resultCode          String?
+  runId               String?
+  expiresAt           DateTime?
+  nextRetryAt         DateTime?
+  lockedUntil         DateTime?
+  lastStartedAt       DateTime?
+  lastFinishedAt      DateTime?
+  lastSuccessAt       DateTime?
+  lastErrorAt         DateTime?
+  errorType           String?
+  errorMessage        String?
+  consecutiveFailures Int       @default(0)
+  updatedAt           DateTime  @updatedAt
 
-  @@unique([target, source])
-  @@map("linkEtf")
-}
-
-/// 同步任务执行历史：判断「收盘后已完成 → 跳过」规则的依据
-model SyncTaskRun {
-  name       String // 'etf_list' | '[code]_kline'
-  status     String // 'success' | 'failed'
-  finishedAt DateTime?
-  error      String?
-
-  @@unique([name])
-  @@map("syncTaskRun")
+  @@index([status, expiresAt])
+  @@map("syncTask")
 }

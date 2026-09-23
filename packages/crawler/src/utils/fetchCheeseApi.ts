@@ -1,18 +1,21 @@
 import CryptoJS from "crypto-js";
 
-// ============ 常量配置 ============
+import {
+  dataResult,
+  emptyResult,
+  errorMessage,
+  errorResult,
+  isRecord,
+  type FetchResult,
+} from "./fetchResult";
+import { fetchJson } from "./fetchJson";
+
 const BASE_URL = "https://stock.cheesefortune.com";
-const AES_KEY = "vGEZCiIXRIImAWSv"; // 从源码中提取的固定密钥
+const AES_KEY = "vGEZCiIXRIImAWSv";
 const TOKEN_API = "/api/v2/system/apiOuth";
 
-// ============ 内存缓存（模拟 sessionStorage） ============
 let cachedToken: string | null = null;
 
-// ============ 工具函数 ============
-
-/**
- * 将字符串按固定长度分块
- */
 function splitToken(token: string, chunkSize = 8): string[] {
   const chunks: string[] = [];
   for (let i = 0; i < token.length; i += chunkSize) {
@@ -21,122 +24,168 @@ function splitToken(token: string, chunkSize = 8): string[] {
   return chunks;
 }
 
-/**
- * AES-ECB 加密，PKCS7 填充，返回十六进制字符串
- */
 function aesEcbEncrypt(plaintext: string, key: string): string {
   const keyWordArray = CryptoJS.enc.Latin1.parse(key);
   const encrypted = CryptoJS.AES.encrypt(plaintext, keyWordArray, {
     mode: CryptoJS.mode.ECB,
     padding: CryptoJS.pad.Pkcs7,
   });
-  return encrypted.toString(); // 默认就是 hex 格式
+  return encrypted.toString();
 }
 
-/**
- * 计算 MD5（返回 32 位小写十六进制）
- */
 function md5(data: string): string {
   return CryptoJS.MD5(data).toString();
 }
 
-/**
- * 获取 API 认证 token（带缓存）
- */
-async function fetchApiToken(): Promise<string> {
-  if (cachedToken) return cachedToken;
-
-  const resp = await fetch(`${BASE_URL}${TOKEN_API}`, {
-    headers: { "Content-Type": "application/json;charset=utf-8" },
-  });
-
-  const data = (await resp.json()) as any;
-
-  const token = data?.datas;
-  if (!token) {
-    throw new Error("获取 API 认证 token 失败");
-  }
-  cachedToken = token;
-  return token;
+function isApiSuccess(body: Record<string, unknown>): boolean {
+  if (body.success === false) return false;
+  if (body.code === undefined || body.code === null) return true;
+  return (
+    body.code === 0 ||
+    body.code === 200 ||
+    body.code === "0" ||
+    body.code === "000" ||
+    body.code === "200"
+  );
 }
 
-/**
- * 生成 zstokv1 签名
- * @param apiToken  从 /api/v2/system/apiOuth 获取的 token
- * @param timestamp 13 位毫秒时间戳
- */
+function apiErrorMessage(body: Record<string, unknown>): string {
+  const message = body.message;
+  return typeof message === "string" && message
+    ? message
+    : `接口业务错误: ${String(body.code)}`;
+}
+
+async function fetchApiToken(): Promise<FetchResult<string>> {
+  if (cachedToken) return dataResult(cachedToken, null);
+
+  const response = await fetchJson(`${BASE_URL}${TOKEN_API}`, {
+    headers: { "Content-Type": "application/json;charset=utf-8" },
+  });
+  if (response.kind !== "data") return response;
+
+  if (!isRecord(response.data.body)) {
+    return errorResult("schema", "token 接口响应结构不正确", false);
+  }
+  if (!isApiSuccess(response.data.body)) {
+    return errorResult("api", apiErrorMessage(response.data.body), false);
+  }
+
+  const token = response.data.body.datas;
+  if (typeof token !== "string" || !token) {
+    return errorResult("schema", "token 接口没有返回有效 datas", false);
+  }
+
+  cachedToken = token;
+  return dataResult(token, response.data.body);
+}
+
 function generateZstokv1(apiToken: string, timestamp: number): string {
-  // 1. 分块
   const chunks = splitToken(apiToken, 8);
-
-  // 2. 取时间戳个位数对应的块（与源码 e % 10 一致）
-  const idx = timestamp % 10;
-  const block = chunks[idx] ?? chunks[chunks.length - 1];
-
-  // 3. AES 加密该块
+  const index = timestamp % 10;
+  const block = chunks[index] ?? chunks[chunks.length - 1];
   const encryptedBlock = aesEcbEncrypt(block, AES_KEY);
-
-  // 4. 拼接时间戳和加密结果，计算 MD5
   return md5(String(timestamp) + encryptedBlock);
 }
 
-/**
- * 构造完整的请求头（对应源码中的 u1() 函数）
- * @param userToken 用户登录 token（localStorage 中的 cheese-outh-token），游客可传空字符串
- * @param deviceType 设备类型，如 "ios" / "android" / "pc"
- * @param runtimeType 运行环境，如 "unknown" / "wechat"
- * @param appVersion App 版本号，可传空字符串
- */
 async function buildHeaders(
   timestamp: number,
-  Referer = "",
-): Promise<Record<string, string>> {
-  const apiToken = await fetchApiToken();
-  const zstokv1 = generateZstokv1(apiToken, timestamp);
-  return {
-    accept: "*/*",
-    "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
-    "app-version": "",
-    "cache-control": "no-cache",
-    "content-type": "application/json;charset=utf-8",
-    devicetype: "ios",
-    expires: "-1",
-    pragma: "no-cache",
-    requestfrom: "wechat",
-    runtimetype: "unknown",
-    "sec-ch-ua":
-      '"Google Chrome";v="149", "Chromium";v="149", "Not)A;Brand";v="24"',
-    "sec-ch-ua-mobile": "?1",
-    "sec-ch-ua-platform": '"iOS"',
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-origin",
-    timestamp: String(timestamp),
-    token: "",
-    zstokv1,
-    Referer,
-  };
+  referer: string,
+): Promise<FetchResult<Record<string, string>>> {
+  const tokenResult = await fetchApiToken();
+  if (tokenResult.kind !== "data") return tokenResult;
+
+  const zstokv1 = generateZstokv1(tokenResult.data, timestamp);
+  return dataResult(
+    {
+      accept: "*/*",
+      "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
+      "app-version": "",
+      "cache-control": "no-cache",
+      "content-type": "application/json;charset=utf-8",
+      devicetype: "ios",
+      expires: "-1",
+      pragma: "no-cache",
+      requestfrom: "wechat",
+      runtimetype: "unknown",
+      "sec-ch-ua":
+        '"Google Chrome";v="149", "Chromium";v="149", "Not)A;Brand";v="24"',
+      "sec-ch-ua-mobile": "?1",
+      "sec-ch-ua-platform": '"iOS"',
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      timestamp: String(timestamp),
+      token: "",
+      zstokv1,
+      Referer: referer,
+    },
+    null,
+  );
 }
 
-// ============ 主函数：发起请求 ============
-
 /**
- * 请求芝士财富的 API
+ * 请求芝士财富 API，并保留“业务失败”和“成功但无数据”的区别。
  */
-export async function fetchCheeseApi(options: {
+export async function fetchCheeseApi<T>(options: {
   url: string;
   Referer: string;
   timestamp: number;
-}): Promise<any> {
-  const headers = await buildHeaders(options.timestamp, options.Referer);
-  const resp = await fetch(options.url, {
-    method: "GET",
-    body: null,
-    headers,
-  });
+}): Promise<FetchResult<T>> {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const headersResult = await buildHeaders(
+      options.timestamp,
+      options.Referer,
+    );
+    if (headersResult.kind !== "data") return headersResult;
 
-  // 处理响应（对应源码中的解密逻辑，如需可补充）
-  let data = (await resp.json()) as any;
+    let response: Awaited<ReturnType<typeof fetchJson>>;
+    try {
+      response = await fetchJson(options.url, {
+        method: "GET",
+        headers: headersResult.data,
+      });
+    } catch (error) {
+      return errorResult("network", errorMessage(error), true);
+    }
 
-  return data?.datas ?? null;
+    if (response.kind !== "data") return response;
+
+    if (response.data.status === 401 && attempt === 0) {
+      cachedToken = null;
+      continue;
+    }
+
+    if (!isRecord(response.data.body)) {
+      return errorResult(
+        "schema",
+        "接口响应不是对象结构",
+        false,
+        response.data.status,
+      );
+    }
+
+    const body = response.data.body;
+    if (!isApiSuccess(body)) {
+      const retryable = body.code === "401";
+      if (retryable && attempt === 0) {
+        cachedToken = null;
+        continue;
+      }
+      return errorResult(
+        "api",
+        apiErrorMessage(body),
+        retryable,
+        response.data.status,
+      );
+    }
+
+    if (body.datas === null || body.datas === undefined) {
+      return emptyResult("datas 为空", body);
+    }
+
+    return dataResult(body.datas as T, body);
+  }
+
+  return errorResult("api", "接口认证失败", true);
 }

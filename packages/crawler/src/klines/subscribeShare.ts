@@ -1,31 +1,45 @@
-fetch(
-  "https://stock.cheesefortune.com/api/v2/k/subscribeShare?code=159502.SZ&days=5&isCN=true",
-  {
-    headers: {
-      accept: "*/*",
-      "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
-      "app-version": "",
-      "cache-control": "no-cache",
-      "content-type": "application/json;charset=utf-8",
-      devicetype: "ios",
-      expires: "-1",
-      pragma: "no-cache",
-      requestfrom: "wechat",
-      runtimetype: "unknown",
-      "sec-ch-ua":
-        '"Chromium";v="152", "Not?A_Brand";v="24", "Google Chrome";v="152"',
-      "sec-ch-ua-mobile": "?1",
-      "sec-ch-ua-platform": '"iOS"',
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-origin",
-      timestamp: "1790155864346",
-      token: "",
-      zstokv1: "c203c43363fbb32be211071cb32b9d9c",
-      Referer:
-        "https://stock.cheesefortune.com/security/etf/159502.SZ?blank=true",
-    },
-    body: null,
-    method: "GET",
-  },
-);
+import { fetchCheeseApi } from "../utils/fetchCheeseApi";
+import {
+  dataResult,
+  emptyResult,
+  errorResult,
+  type FetchResult,
+} from "../utils/fetchResult";
+import {
+  latestSubscribeShareDate,
+  parseSubscribeShareRows,
+} from "./parsers";
+import type { SubscribeShareRow } from "./types";
+
+export interface SubscribeShareSnapshotData {
+  code: string;
+  latestDate: number;
+  rows: SubscribeShareRow[];
+}
+
+export async function fetchSubscribeShare(
+  code = "159502.SZ",
+  days = 5,
+): Promise<FetchResult<SubscribeShareSnapshotData>> {
+  const response = await fetchCheeseApi<unknown>({
+    timestamp: Date.now(),
+    url: `https://stock.cheesefortune.com/api/v2/k/subscribeShare?code=${code}&days=${days}&isCN=true`,
+    Referer: `https://stock.cheesefortune.com/security/etf/${code}?blank=true`,
+  });
+  if (response.kind !== "data") return response;
+
+  const rows = parseSubscribeShareRows(response.data);
+  if (!rows) {
+    return errorResult("schema", "subscribeShare 返回结构不正确", false);
+  }
+  if (rows.length === 0) {
+    return emptyResult("subscribeShare 没有数据", response.raw);
+  }
+
+  const latestDate = latestSubscribeShareDate(rows);
+  if (latestDate === null) {
+    return errorResult("schema", "subscribeShare 没有有效日期", false);
+  }
+
+  return dataResult({ code, latestDate, rows }, response.raw);
+}

@@ -4,17 +4,25 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/*.test.ts",
+    "sync:etfs": "tsx src/main.ts etfs",
+    "sync:link-fund": "tsx src/main.ts link-fund",
+    "sync:hold-all": "tsx src/main.ts hold-all",
+    "sync:kline": "tsx src/main.ts kline",
+    "sync:all": "tsx src/main.ts all"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@quant-backtest/db": "workspace:*",
     "crypto-js": "^4.2.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
     "@types/crypto-js": "^4.2.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.5.4"
   }
 }
