@@ -1,0 +1,61 @@
+// 量化回测系统 Prisma Schema（骨架）
+// 模型：日K（Kline）/ 阶段收益（PeriodReturn）/ 标的基础信息（Security）/ 同步任务历史（SyncTaskRun）
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// 前复权日K线数据
+model Kline {
+  code          String
+  date          Int // YYYYMMDD
+  open          Float
+  high          Float
+  low           Float
+  close         Float
+  volume        Float
+  amount        Float
+  change        Float
+  changePercent Float
+
+  @@unique([code, date])
+  @@index([code, date])
+  @@map("kline")
+}
+
+/// ETF基础信息
+model Etf {
+  code          String @id
+  name          String
+  trackingIndex String
+  trackIndex    String
+  scale         Float?
+
+  @@map("etf")
+}
+
+/// 相似度
+model LinkEtf {
+  target  String
+  source  String
+  similar Float?
+
+  @@unique([target, source])
+  @@map("linkEtf")
+}
+
+/// 同步任务执行历史：判断「收盘后已完成 → 跳过」规则的依据
+model SyncTaskRun {
+  name       String // 'etf_list' | '[code]_kline'
+  status     String // 'success' | 'failed'
+  finishedAt DateTime?
+  error      String?
+
+  @@unique([name])
+  @@map("syncTaskRun")
+}
