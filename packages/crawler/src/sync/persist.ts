@@ -8,10 +8,26 @@ import {
 import type { EtfRecord } from "../etfs/fetchEtfs";
 import type { EtfHoldingRecord } from "../holdAll/fetch";
 import type { LinkEtfRecord } from "../linkFund/fetch";
-import type { KlineRecord } from "../klines/types";
+import type {
+  AdjustFactorRecord,
+  DayKv2Data,
+  FloatShareRecord,
+  KlineRecord,
+} from "../klines/types";
 import type { SubscribeShareSnapshotData } from "../klines/subscribeShare";
 
 type TransactionClient = Prisma.TransactionClient;
+
+/** createMany 单批行数上限，避免超出 SQLite 的绑定参数上限。 */
+const CREATE_MANY_CHUNK = 500;
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const batches: T[][] = [];
+  for (let index = 0; index < items.length; index += size) {
+    batches.push(items.slice(index, index + size));
+  }
+  return batches;
+}
 
 function sameNumber(a: number, b: number): boolean {
   return Math.abs(a - b) < 1e-10;
@@ -146,8 +162,45 @@ export async function persistHoldings(
   });
 }
 
-export async function persistDayKv2(records: KlineRecord[]): Promise<void> {
-  await prisma.$transaction((tx) => upsertKlines(tx, records));
+/**
+ * dayKV2 每次返回全量历史，因此复权因子与份额按标的整体替换。
+ * 接口未返回对应数组时保留库中已有数据，避免把好数据清空。
+ */
+async function replaceAdjustFactors(
+  tx: TransactionClient,
+  code: string,
+  records: AdjustFactorRecord[],
+): Promise<void> {
+  if (records.length === 0) return;
+
+  await tx.etfAdjustFactor.deleteMany({ where: { code } });
+  for (const batch of chunk(records, CREATE_MANY_CHUNK)) {
+    await tx.etfAdjustFactor.createMany({ data: batch });
+  }
+}
+
+async function replaceFloatShares(
+  tx: TransactionClient,
+  code: string,
+  records: FloatShareRecord[],
+): Promise<void> {
+  if (records.length === 0) return;
+
+  await tx.etfFloatShare.deleteMany({ where: { code } });
+  for (const batch of chunk(records, CREATE_MANY_CHUNK)) {
+    await tx.etfFloatShare.createMany({ data: batch });
+  }
+}
+
+export async function persistDayKv2(data: DayKv2Data): Promise<void> {
+  const code = data.klines[0]?.code ?? data.factors[0]?.code;
+  if (!code) return;
+
+  await prisma.$transaction(async (tx) => {
+    await upsertKlines(tx, data.klines);
+    await replaceAdjustFactors(tx, code, data.factors);
+    await replaceFloatShares(tx, code, data.floatShares);
+  });
 }
 
 export async function persistSubscribeKlines(

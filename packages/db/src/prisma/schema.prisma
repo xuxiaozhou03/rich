@@ -67,6 +67,29 @@ model Kline {
   @@map("kline")
 }
 
+/// 复权因子（稀疏：仅在上市首日与除权除息日各一行）
+/// 后复权价 = kline 原始价 * 当日生效的 factor，早于首条记录时 factor 为 1
+model EtfAdjustFactor {
+  code      String
+  date      Int
+  factor    Float
+  updatedAt DateTime @updatedAt
+
+  @@id([code, date])
+  @@map("etfAdjustFactor")
+}
+
+/// 每日份额：份额 * 收盘价 即当日规模，份额环比变化即申赎资金流
+model EtfFloatShare {
+  code      String
+  date      Int
+  shares    Float
+  updatedAt DateTime @updatedAt
+
+  @@id([code, date])
+  @@map("etfFloatShare")
+}
+
 /// subscribeShare 原始快照
 model SubscribeShareSnapshot {
   id             String   @id @default(cuid())

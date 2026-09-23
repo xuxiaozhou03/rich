@@ -6,12 +6,17 @@ import {
   type FetchResult,
 } from "../utils/fetchResult";
 import { obfuscateTimestamp } from "../utils/obfuscateTimestamp";
-import { buildDayKv2Klines, parseDayKv2Payload } from "./parsers";
-import type { KlineRecord } from "./types";
+import {
+  buildAdjustFactors,
+  buildDayKv2Klines,
+  buildFloatShares,
+  parseDayKv2Payload,
+} from "./parsers";
+import type { DayKv2Data } from "./types";
 
 export async function fetchDayKv2(
   code = "159502.SZ",
-): Promise<FetchResult<KlineRecord[]>> {
+): Promise<FetchResult<DayKv2Data>> {
   const timestamp = Date.now();
   const response = await fetchCheeseApi<unknown>({
     timestamp,
@@ -28,5 +33,12 @@ export async function fetchDayKv2(
     return emptyResult("dayKV2 没有 K 线数据", response.raw);
   }
 
-  return dataResult(buildDayKv2Klines(code, payload), response.raw);
+  return dataResult(
+    {
+      klines: buildDayKv2Klines(code, payload),
+      factors: buildAdjustFactors(code, payload),
+      floatShares: buildFloatShares(code, payload),
+    },
+    response.raw,
+  );
 }

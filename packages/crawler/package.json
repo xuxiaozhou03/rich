@@ -9,7 +9,7 @@
     "sync:etfs": "tsx src/main.ts etfs",
     "sync:link-fund": "tsx src/main.ts link-fund",
     "sync:hold-all": "tsx src/main.ts hold-all",
-    "sync:kline": "tsx src/main.ts kline",
+    "sync:kline": "tsx src/main.ts kline --force",
     "sync:all": "tsx src/main.ts all"
   },
   "keywords": [],
