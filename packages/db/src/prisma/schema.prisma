@@ -90,19 +90,11 @@ model EtfFloatShare {
   @@map("etfFloatShare")
 }
 
-/// subscribeShare 原始快照
+/// subscribeShare 原始快照：每只 ETF 一行，存最近一次抓到的原始响应
 model SubscribeShareSnapshot {
-  id             String   @id @default(cuid())
-  code           String
-  latestDate     Int
-  payload        String
-  payloadHash    String
-  firstFetchedAt DateTime @default(now())
-  lastFetchedAt  DateTime @default(now())
-  lastSeenAt     DateTime @default(now())
+  code    String @id
+  payload String
 
-  @@unique([code, latestDate])
-  @@index([code, latestDate])
   @@map("subscribeShareSnapshot")
 }
 

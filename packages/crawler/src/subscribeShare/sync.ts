@@ -11,7 +11,11 @@ import {
 import { getLatestDayKv2Date, hasKlineOn } from "../klines/persist";
 import type { KlineRecord } from "../klines/types";
 import { fetchSubscribeShare } from "./fetch";
-import { buildSubscribeShareKlines, parseSubscribeShareRows } from "./parsers";
+import {
+  buildSubscribeShareKlines,
+  latestSubscribeShareDate,
+  parseSubscribeShareRows,
+} from "./parsers";
 import {
   persistSubscribeKlines,
   persistSubscribeShareSnapshot,
@@ -33,7 +37,6 @@ export async function syncKlineCalculation(
 ): Promise<SyncRunResult> {
   interface CalculatedKlineBatch {
     records: KlineRecord[];
-    snapshotId: string;
     dayKv2LatestDate: number | null;
   }
 
@@ -52,26 +55,11 @@ export async function syncKlineCalculation(
         };
       }
 
-      const snapshot = await prisma.subscribeShareSnapshot.findFirst({
+      const snapshot = await prisma.subscribeShareSnapshot.findUnique({
         where: { code },
-        orderBy: { latestDate: "desc" },
       });
       if (!snapshot) {
         return emptyResult("没有 subscribeShare 原始快照");
-      }
-
-      if (
-        dayKv2LatestDate !== null &&
-        snapshot.latestDate <= dayKv2LatestDate
-      ) {
-        return {
-          kind: "skipped",
-          reason: "covered_by_day_kv2",
-          raw: {
-            subscribeShareLatestDate: snapshot.latestDate,
-            dayKv2LatestDate,
-          },
-        };
       }
 
       let payload: unknown;
@@ -100,6 +88,27 @@ export async function syncKlineCalculation(
         );
       }
 
+      const latestDate = latestSubscribeShareDate(rows);
+      if (latestDate === null) {
+        return errorResult(
+          "schema",
+          "subscribeShare 快照没有有效日期",
+          false,
+        );
+      }
+
+      // dayKV2 已经覆盖到快照的最后日期，没有缺口。
+      if (dayKv2LatestDate !== null && latestDate <= dayKv2LatestDate) {
+        return {
+          kind: "skipped",
+          reason: "covered_by_day_kv2",
+          raw: {
+            subscribeShareLatestDate: latestDate,
+            dayKv2LatestDate,
+          },
+        };
+      }
+
       const records = buildSubscribeShareKlines(
         code,
         rows,
@@ -112,14 +121,7 @@ export async function syncKlineCalculation(
         );
       }
 
-      return dataResult(
-        {
-          records,
-          snapshotId: snapshot.id,
-          dayKv2LatestDate,
-        },
-        payload,
-      );
+      return dataResult({ records, dayKv2LatestDate }, payload);
     },
     persist: async (data) => {
       await persistSubscribeKlines(data.records);
