@@ -106,24 +106,15 @@ model SubscribeShareSnapshot {
   @@map("subscribeShareSnapshot")
 }
 
-/// 同步任务状态
+/// 同步任务状态：每个任务一行，形如 day_kv2:513050.SH
 model SyncTask {
-  taskKey             String    @id
-  status              String
-  resultCode          String?
-  runId               String?
-  expiresAt           DateTime?
-  nextRetryAt         DateTime?
-  lockedUntil         DateTime?
-  lastStartedAt       DateTime?
-  lastFinishedAt      DateTime?
-  lastSuccessAt       DateTime?
-  lastErrorAt         DateTime?
-  errorType           String?
-  errorMessage        String?
-  consecutiveFailures Int       @default(0)
-  updatedAt           DateTime  @updatedAt
+  taskKey   String   @id
+  /// success | failed
+  status    String
+  /// 失败原因，success 时为 null
+  error     String?
+  /// 上次运行（写库）时间：success 靠它判断是否已经跨交易日（交易日历见 crawler）
+  updatedAt DateTime @updatedAt
 
-  @@index([status, expiresAt])
   @@map("syncTask")
 }

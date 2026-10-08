@@ -5,17 +5,8 @@ import {
   errorResult,
   type FetchResult,
 } from "../utils/fetchResult";
-import {
-  latestSubscribeShareDate,
-  parseSubscribeShareRows,
-} from "./parsers";
-import type { SubscribeShareRow } from "./types";
-
-export interface SubscribeShareSnapshotData {
-  code: string;
-  latestDate: number;
-  rows: SubscribeShareRow[];
-}
+import { latestSubscribeShareDate, parseSubscribeShareRows } from "./parsers";
+import type { SubscribeShareSnapshotData } from "./types";
 
 export async function fetchSubscribeShare(
   code = "159502.SZ",

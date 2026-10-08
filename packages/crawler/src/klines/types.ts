@@ -15,15 +15,6 @@ export type DayKv2FactorRow = [number, number];
 /** [日期, 份额]。 */
 export type DayKv2FloatShareRow = [number, number];
 
-export type SubscribeShareRow = [
-  string | number,
-  number | null,
-  number | null,
-  number | null,
-  number | null,
-  number | null,
-];
-
 export interface DayKv2Payload {
   list: DayKv2Row[];
   /** 稀疏的复权因子阶梯，只在上市首日与除权除息日出现。 */

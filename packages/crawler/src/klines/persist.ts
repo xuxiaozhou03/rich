@@ -1,20 +1,11 @@
-import { createHash } from "node:crypto";
+import { Prisma, prisma } from "@quant-backtest/db";
 
-import {
-  Prisma,
-  prisma,
-} from "@quant-backtest/db";
-
-import type { EtfRecord } from "../etfs/fetchEtfs";
-import type { EtfHoldingRecord } from "../holdAll/fetch";
-import type { LinkEtfRecord } from "../linkFund/fetch";
 import type {
   AdjustFactorRecord,
   DayKv2Data,
   FloatShareRecord,
   KlineRecord,
-} from "../klines/types";
-import type { SubscribeShareSnapshotData } from "../klines/subscribeShare";
+} from "./types";
 
 type TransactionClient = Prisma.TransactionClient;
 
@@ -62,7 +53,8 @@ function sameKline(
   );
 }
 
-async function upsertKlines(
+/** dayKV2 是权威日 K：比 subscribeShare 聚合出来的行优先。 */
+export async function upsertKlines(
   tx: TransactionClient,
   records: KlineRecord[],
 ): Promise<void> {
@@ -108,60 +100,6 @@ async function upsertKlines(
   }
 }
 
-export async function persistEtfs(records: EtfRecord[]): Promise<void> {
-  await prisma.$transaction(async (tx) => {
-    for (const record of records) {
-      await tx.etf.upsert({
-        where: { code: record.code },
-        create: record,
-        update: {
-          name: record.name,
-          scale: record.scale,
-          trackingIndex: record.trackingIndex,
-          trackIndex: record.trackIndex,
-        },
-      });
-    }
-
-    await tx.etf.deleteMany({
-      where: { code: { notIn: records.map((record) => record.code) } },
-    });
-  });
-}
-
-export async function persistLinkEtfs(
-  target: string,
-  records: LinkEtfRecord[],
-): Promise<void> {
-  await prisma.$transaction(async (tx) => {
-    await tx.linkEtf.deleteMany({ where: { target } });
-    await tx.linkEtf.createMany({
-      data: records.map((record) => ({
-        target,
-        source: record.code,
-        similar: record.similar,
-      })),
-    });
-  });
-}
-
-export async function persistHoldings(
-  etfCode: string,
-  records: EtfHoldingRecord[],
-): Promise<void> {
-  await prisma.$transaction(async (tx) => {
-    await tx.etfHolding.deleteMany({ where: { etfCode } });
-    await tx.etfHolding.createMany({
-      data: records.map((record) => ({
-        etfCode,
-        securityCode: record.securityCode,
-        name: record.name,
-        holdScale: record.holdScale,
-      })),
-    });
-  });
-}
-
 /**
  * dayKV2 每次返回全量历史，因此复权因子与份额按标的整体替换。
  * 接口未返回对应数组时保留库中已有数据，避免把好数据清空。
@@ -203,64 +141,7 @@ export async function persistDayKv2(data: DayKv2Data): Promise<void> {
   });
 }
 
-export async function persistSubscribeKlines(
-  records: KlineRecord[],
-): Promise<void> {
-  await prisma.$transaction((tx) => upsertKlines(tx, records));
-}
-
-export async function persistSubscribeShareSnapshot(
-  data: SubscribeShareSnapshotData,
-  raw: unknown,
-): Promise<void> {
-  const payload = JSON.stringify(raw ?? data.rows);
-  const payloadHash = createHash("sha256")
-    .update(JSON.stringify(data.rows))
-    .digest("hex");
-  const now = new Date();
-  const existing = await prisma.subscribeShareSnapshot.findUnique({
-    where: {
-      code_latestDate: {
-        code: data.code,
-        latestDate: data.latestDate,
-      },
-    },
-  });
-
-  if (!existing) {
-    await prisma.subscribeShareSnapshot.create({
-      data: {
-        code: data.code,
-        latestDate: data.latestDate,
-        payload,
-        payloadHash,
-        firstFetchedAt: now,
-        lastFetchedAt: now,
-        lastSeenAt: now,
-      },
-    });
-    return;
-  }
-
-  if (existing.payloadHash === payloadHash) {
-    await prisma.subscribeShareSnapshot.update({
-      where: { id: existing.id },
-      data: { lastSeenAt: now },
-    });
-    return;
-  }
-
-  await prisma.subscribeShareSnapshot.update({
-    where: { id: existing.id },
-    data: {
-      payload,
-      payloadHash,
-      lastFetchedAt: now,
-      lastSeenAt: now,
-    },
-  });
-}
-
+/** 库里 day_kv2 的最新日期，用来判断 subscribeShare 有没有更新的日期要补。 */
 export async function getLatestDayKv2Date(
   code: string,
 ): Promise<number | null> {
@@ -270,4 +151,16 @@ export async function getLatestDayKv2Date(
     select: { date: true },
   });
   return row?.date ?? null;
+}
+
+/** kline 里是否已经有某一天的日 K（任意来源），用来判断当天数据是否已存在。 */
+export async function hasKlineOn(
+  code: string,
+  date: number,
+): Promise<boolean> {
+  const row = await prisma.kline.findUnique({
+    where: { code_date: { code, date } },
+    select: { code: true },
+  });
+  return row !== null;
 }
