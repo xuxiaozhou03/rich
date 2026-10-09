@@ -1,0 +1,26 @@
+{
+  "name": "@quant-backtest/engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "回测引擎：读行情数据、跑策略、算指标",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/*.test.ts"
+  },
+  "dependencies": {
+    "@quant-backtest/db": "workspace:*",
+    "@quant-backtest/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4"
+  }
+}

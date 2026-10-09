@@ -1,0 +1,25 @@
+{
+  "name": "@quant-backtest/strategies",
+  "version": "0.1.0",
+  "private": true,
+  "description": "策略库：以 TypeScript 文件管理，Git 沉淀",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/*.test.ts"
+  },
+  "dependencies": {
+    "@quant-backtest/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4"
+  }
+}
