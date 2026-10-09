@@ -17,7 +17,6 @@ model Etf {
   trackingIndex String
   trackIndex    String?
   scale         Float?
-  updatedAt     DateTime @updatedAt
 
   @@map("etf")
 }
@@ -27,7 +26,6 @@ model LinkEtf {
   target    String
   source    String
   similar   Float?
-  updatedAt DateTime @updatedAt
 
   @@id([target, source])
   @@index([source])
@@ -40,7 +38,6 @@ model EtfHolding {
   securityCode String
   name         String
   holdScale    Float
-  updatedAt    DateTime @updatedAt
 
   @@id([etfCode, securityCode])
   @@map("etfHolding")
@@ -60,7 +57,6 @@ model Kline {
   change        Float
   changePercent Float
   source        String
-  updatedAt     DateTime @updatedAt
 
   @@id([code, date])
   @@index([code, source, date])
@@ -73,7 +69,6 @@ model EtfAdjustFactor {
   code      String
   date      Int
   factor    Float
-  updatedAt DateTime @updatedAt
 
   @@id([code, date])
   @@map("etfAdjustFactor")
@@ -84,7 +79,6 @@ model EtfFloatShare {
   code      String
   date      Int
   shares    Float
-  updatedAt DateTime @updatedAt
 
   @@id([code, date])
   @@map("etfFloatShare")
