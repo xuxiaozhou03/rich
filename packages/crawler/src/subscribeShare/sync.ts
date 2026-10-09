@@ -43,7 +43,8 @@ export async function syncKlineCalculation(
   return runSyncTask<CalculatedKlineBatch>({
     taskKey: `kline_calc:${code}`,
     execute: async () => {
-      const dayKv2LatestDate = await getLatestDayKv2Date(code);
+      const dayKv2Latest = await getLatestDayKv2Date(code);
+      const dayKv2LatestDate = dayKv2Latest?.date ?? null;
 
       const session = Number(currentTradingSession().key);
       // 当天（当前交易日）的日 K 已经有了，就不再从 subscribeShare 聚合。
@@ -113,6 +114,7 @@ export async function syncKlineCalculation(
         code,
         rows,
         dayKv2LatestDate,
+        dayKv2Latest?.close ?? null,
       );
       if (records.length === 0) {
         return emptyResult(

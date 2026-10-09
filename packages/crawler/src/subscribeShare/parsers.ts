@@ -45,6 +45,7 @@ export function buildSubscribeShareKlines(
   code: string,
   rows: SubscribeShareRow[],
   minExclusiveDate: number | null,
+  initialPreviousClose: number | null = null,
 ): KlineRecord[] {
   const grouped = new Map<number, SubscribeShareRow[]>();
 
@@ -58,7 +59,9 @@ export function buildSubscribeShareKlines(
 
   const dates = [...grouped.keys()].sort((a, b) => a - b);
   const result: KlineRecord[] = [];
-  let previousClose: number | null = null;
+  // 快照只覆盖最近若干天，窗口内最早一天没有"上一根"。
+  // 用 dayKV2 最新一根的收盘价兜底，避免退化成用当天开盘价（prices[0]）当 preClose。
+  let previousClose: number | null = initialPreviousClose;
 
   for (const date of dates) {
     const items = grouped.get(date)!;
@@ -68,8 +71,9 @@ export function buildSubscribeShareKlines(
     const close = prices[prices.length - 1];
     if (close === undefined) continue;
 
-    const explicitPreClose = items.find((row) => row[5] !== null)?.[5] ?? null;
-    const preClose = explicitPreClose ?? previousClose ?? prices[0];
+    // 快照第 6 列不是上一交易日的收盘价（实测常为前两日收盘或盘中价），
+    // 所以只用上一个交易日的收盘价：窗口内按日推进，首日以 dayKV2 最新收盘兜底。
+    const preClose = previousClose ?? prices[0];
     const change = close - preClose;
 
     if (minExclusiveDate === null || date > minExclusiveDate) {

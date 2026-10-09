@@ -141,16 +141,20 @@ export async function persistDayKv2(data: DayKv2Data): Promise<void> {
   });
 }
 
-/** 库里 day_kv2 的最新日期，用来判断 subscribeShare 有没有更新的日期要补。 */
+/**
+ * 库里 day_kv2 的最新一根日 K（日期 + 收盘价）：
+ * 日期用来判断 subscribeShare 有没有更新的日期要补，
+ * 收盘价作为 subscribeShare 补 K 时最前面那天的 preClose 基准。
+ */
 export async function getLatestDayKv2Date(
   code: string,
-): Promise<number | null> {
+): Promise<{ date: number; close: number } | null> {
   const row = await prisma.kline.findFirst({
     where: { code, source: "day_kv2" },
     orderBy: { date: "desc" },
-    select: { date: true },
+    select: { date: true, close: true },
   });
-  return row?.date ?? null;
+  return row;
 }
 
 /** kline 里是否已经有某一天的日 K（任意来源），用来判断当天数据是否已存在。 */
