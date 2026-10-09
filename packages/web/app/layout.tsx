@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 
 const NAV = [
   { href: "/", label: "总览" },
+  { href: "/etfs", label: "ETF" },
   { href: "/strategies", label: "策略" },
   { href: "/backtest/new", label: "新建回测" },
   { href: "/runs", label: "回测记录" },

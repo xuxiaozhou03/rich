@@ -23,6 +23,11 @@ export function formatMoney(value: number): string {
   return value.toLocaleString("zh-CN", { maximumFractionDigits: 0 });
 }
 
+/** 元（或份）→ 亿元（亿份），保留 digits 位小数。 */
+export function formatYi(value: number, digits = 2): string {
+  return (value / 1e8).toFixed(digits);
+}
+
 /** YYYYMMDD → 时间轴的 UTC 毫秒。 */
 export function dateToUtc(date: number): number {
   const year = Math.floor(date / 10000);
