@@ -9,5 +9,10 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "pnpm": {
+    "patchedDependencies": {
+      "kline-charts-react@0.1.0": "patches/kline-charts-react@0.1.0.patch"
+    }
+  }
 }
