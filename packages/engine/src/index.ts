@@ -11,3 +11,4 @@ export * from "./engine/backtest";
 export * from "./analyzer/metrics";
 export * from "./analyzer/curve";
 export * from "./worker/grid";
+export * from "./store/persist";

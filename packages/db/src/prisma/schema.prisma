@@ -104,3 +104,81 @@ model SyncTask {
 
   @@map("syncTask")
 }
+
+/// 回测运行记录（策略以 TS 文件管理，这里只存 id，不建策略表）
+model BacktestRun {
+  id                 String   @id
+  strategyId         String
+  /// 运行时 Git commit hash
+  gitCommit          String?
+  /// 策略参数 JSON
+  params             String
+  startDate          Int
+  endDate            Int
+  /// 前复权基准日（= endDate）
+  adjustBaseDate     Int
+  /// 标的池定义 JSON
+  universe           String
+  initCash           Float
+  /// 成本模型 JSON
+  costModel          String
+  /// 前复权快照哈希，用于复现校验
+  adjustSnapshotHash String
+  /// 行情数据版本标识
+  dataVersion        String
+  /// pending | running | success | failed
+  status             String
+  errorMessage       String?
+  /// 绩效指标 JSON
+  metrics            String?
+  createdAt          DateTime @default(now())
+  startedAt          DateTime?
+  finishedAt         DateTime?
+
+  trades BacktestTrade[]
+  equity BacktestEquity[]
+
+  @@index([strategyId])
+  @@index([createdAt])
+  @@map("backtestRun")
+}
+
+/// 回测交易流水
+model BacktestTrade {
+  id             Int         @id @default(autoincrement())
+  runId          String
+  run            BacktestRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  date           Int
+  code           String
+  side           String
+  /// 原始成交价（不复权）
+  price          Float
+  /// 信号时看到的前复权价
+  indicatorPrice Float
+  shares         Float
+  amount         Float
+  fee            Float
+  slippage       Float
+  reason         String
+
+  @@index([runId])
+  @@map("backtestTrade")
+}
+
+/// 回测每日净值
+model BacktestEquity {
+  id          Int         @id @default(autoincrement())
+  runId       String
+  run         BacktestRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  date        Int
+  cash        Float
+  marketValue Float
+  totalValue  Float
+  nav         Float
+  drawdown    Float
+  /// code -> 持仓份额 JSON
+  positions   String
+
+  @@index([runId])
+  @@map("backtestEquity")
+}
