@@ -1,7 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
-import type { AdjustType, PeriodType } from "kline-charts-react";
 
-import { loadKlineSeries } from "@/lib/kline";
+import {
+  loadKlineSeries,
+  type KlineAdjust,
+  type KlinePeriod,
+} from "@/lib/kline";
 
 export const dynamic = "force-dynamic";
 
@@ -12,9 +15,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "symbol 必填" }, { status: 400 });
   }
 
-  const period = (params.get("period") ?? "daily") as PeriodType;
-  const adjust = (params.get("adjust") ?? "") as AdjustType;
+  const period = (params.get("period") ?? "daily") as KlinePeriod;
+  const adjust = (params.get("adjust") ?? "") as KlineAdjust;
   const before = params.get("before") ?? undefined;
+  const after = params.get("after") ?? undefined;
   const limitParam = params.get("limit");
 
   try {
@@ -23,6 +27,7 @@ export async function GET(request: NextRequest) {
       period,
       adjust,
       before,
+      after,
       limit: limitParam ? Number(limitParam) : undefined,
     });
     return NextResponse.json(data);

@@ -1,5 +1,5 @@
 k线图表
-https://github.com/chengzuopeng/kline-charts-react
+https://preview.klinecharts.com/
 
 数据
 https://github.com/chengzuopeng/stock-sdk

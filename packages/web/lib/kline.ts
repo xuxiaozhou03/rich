@@ -1,20 +1,54 @@
 import { prisma } from "@quant-backtest/db";
 import { buildPriceSeries } from "@quant-backtest/engine";
 import type { KlineRow } from "@quant-backtest/shared";
-import type { AdjustType, KlineData, PeriodType } from "kline-charts-react";
 
 import { formatDate, toDateNumber } from "./format";
 
+export type KlinePeriod =
+  | "timeline"
+  | "timeline5"
+  | "1"
+  | "5"
+  | "15"
+  | "30"
+  | "60"
+  | "daily"
+  | "weekly"
+  | "monthly";
+
+export type KlineAdjust = "" | "qfq" | "hfq";
+
+export interface KlineData {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  amount: number;
+  change: number;
+  changePercent: number;
+}
+
 export interface KlineQuery {
   code: string;
-  period: PeriodType;
-  adjust: AdjustType;
+  period: KlinePeriod;
+  adjust: KlineAdjust;
   before?: string | number;
+  after?: string | number;
   limit?: number;
 }
 
 /** 只有日 K 数据，这几个周期直接返回空。 */
-const MINUTE_PERIODS = new Set<PeriodType>(["timeline", "timeline5", "1", "5", "15", "30", "60"]);
+const MINUTE_PERIODS = new Set<KlinePeriod>([
+  "timeline",
+  "timeline5",
+  "1",
+  "5",
+  "15",
+  "30",
+  "60",
+]);
 
 function isoWeekKey(year: number, month: number, day: number): string {
   const date = new Date(Date.UTC(year, month - 1, day));
@@ -114,10 +148,21 @@ export async function loadKlineSeries(query: KlineQuery): Promise<KlineData[]> {
     data = aggregate(data, query.period);
   }
 
-  if (query.before !== undefined && query.before !== null && query.before !== "") {
+  const hasBefore =
+    query.before !== undefined && query.before !== null && query.before !== "";
+  const hasAfter =
+    query.after !== undefined && query.after !== null && query.after !== "";
+
+  if (hasBefore) {
     const before = toDateNumber(String(query.before));
     data = data.filter((row) => toDateNumber(row.date) < before);
-    if (query.limit && query.limit > 0) data = data.slice(-query.limit);
+  }
+  if (hasAfter) {
+    const after = toDateNumber(String(query.after));
+    data = data.filter((row) => toDateNumber(row.date) > after);
+  }
+  if (query.limit && query.limit > 0) {
+    data = hasAfter ? data.slice(0, query.limit) : data.slice(-query.limit);
   }
 
   return data;
