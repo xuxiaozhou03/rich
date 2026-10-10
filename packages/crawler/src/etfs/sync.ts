@@ -20,7 +20,7 @@ export async function getEtfCodes(): Promise<string[]> {
   return rows.map((row) => row.code);
 }
 
-/** 去重后的跟踪指数代码，用于抓取指数估值数据。 */
+/** 去重后的跟踪指数代码，用于抓取指数估值、行业映射等数据。 */
 export async function getTrackIndexes(): Promise<string[]> {
   const rows = await prisma.etf.findMany({
     where: {

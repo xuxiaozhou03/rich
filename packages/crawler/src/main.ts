@@ -6,6 +6,7 @@ import { syncDayKv2 } from "./klines/sync";
 import { syncLinkFund } from "./linkFund/sync";
 import { syncPepb } from "./pepb/sync";
 import { syncKlineCalculation, syncSubscribeShare } from "./subscribeShare/sync";
+import { syncSwMap } from "./sw/sync";
 
 /** --dev 只跑前几只 ETF，方便本地调试时不用等全量。 */
 const DEV_CODE_LIMIT = 5;
@@ -23,6 +24,7 @@ async function syncAll(dev: boolean): Promise<void> {
   const trackIndexes = await getTrackIndexes();
   for (const indexCode of dev ? trackIndexes.slice(0, DEV_CODE_LIMIT) : trackIndexes) {
     await syncPepb(indexCode);
+    await syncSwMap(indexCode);
   }
 
   const codes = await getEtfCodes();

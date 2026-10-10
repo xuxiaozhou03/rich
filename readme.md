@@ -20,7 +20,7 @@ https://github.com/jaeleeps/market-calendar/tree/main
 pnpm --filter @quant-backtest/db db:generate
 pnpm --filter @quant-backtest/db db:push
 
-# 全量：ETF 列表 + 跟踪指数估值 + 每只 ETF 的关联、持仓、K 线（已成功且没过期的任务自动跳过）
+# 全量：ETF 列表 + 跟踪指数估值/申万行业权重 + 每只 ETF 的关联、持仓、K 线（已成功且没过期的任务自动跳过）
 pnpm --filter @rich/crawler sync
 
 # 本地调试：只跑前 5 只 ETF

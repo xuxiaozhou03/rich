@@ -110,6 +110,20 @@ model EtfValuationMetric {
   @@map("etfValuationMetric")
 }
 
+/// 指数申万行业权重：level 1 / 2 / 3
+model IndexSwIndustry {
+  indexCode      String
+  level          Int
+  industryCode   String
+  name           String
+  weight         Float
+  capitalOrIndex String
+
+  @@id([indexCode, level, industryCode])
+  @@index([indexCode, level, weight])
+  @@map("indexSwIndustry")
+}
+
 /// subscribeShare 原始快照：每只 ETF 一行，只保存接口返回的 datas 数组
 model SubscribeShareSnapshot {
   code    String @id
