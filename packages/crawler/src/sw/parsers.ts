@@ -15,7 +15,6 @@ function parseIndustry(
   if (
     typeof value.code !== "string" ||
     typeof value.name !== "string" ||
-    typeof value.capitalOrIndex !== "string" ||
     typeof value.weight !== "number" ||
     !Number.isFinite(value.weight)
   ) {
@@ -27,7 +26,6 @@ function parseIndustry(
     industryCode: value.code,
     name: value.name,
     weight: value.weight,
-    capitalOrIndex: value.capitalOrIndex,
   };
 }
 

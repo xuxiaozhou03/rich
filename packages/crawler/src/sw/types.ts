@@ -5,7 +5,6 @@ export interface SwIndustry {
   industryCode: string;
   name: string;
   weight: number;
-  capitalOrIndex: string;
 }
 
 export interface SwIndustryRecord extends SwIndustry {

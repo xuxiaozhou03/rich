@@ -11,7 +11,6 @@ test("swMap parses all three industry levels", () => {
     sw1: [
       {
         code: "801080.ZSI",
-        capitalOrIndex: "index_hy",
         name: "电子",
         weight: 18.4376,
       },
@@ -19,7 +18,6 @@ test("swMap parses all three industry levels", () => {
     sw2: [
       {
         code: "801081.ZSI",
-        capitalOrIndex: "index_hy",
         name: "半导体",
         weight: 4.3643,
       },
@@ -27,7 +25,6 @@ test("swMap parses all three industry levels", () => {
     sw3: [
       {
         code: "852226.ZSI",
-        capitalOrIndex: "index_hy",
         name: "IT服务Ⅲ",
         weight: 6.4594,
       },
@@ -41,21 +38,18 @@ test("swMap parses all three industry levels", () => {
       industryCode: "801080.ZSI",
       name: "电子",
       weight: 18.4376,
-      capitalOrIndex: "index_hy",
     },
     {
       level: 2,
       industryCode: "801081.ZSI",
       name: "半导体",
       weight: 4.3643,
-      capitalOrIndex: "index_hy",
     },
     {
       level: 3,
       industryCode: "852226.ZSI",
       name: "IT服务Ⅲ",
       weight: 6.4594,
-      capitalOrIndex: "index_hy",
     },
   ]);
 });
@@ -65,11 +59,10 @@ test("swMap drops malformed rows and rejects missing levels", () => {
     sw1: [
       {
         code: "801080.ZSI",
-        capitalOrIndex: "index_hy",
         name: "电子",
         weight: 18.4376,
       },
-      { code: "bad", name: "坏数据", weight: 1 },
+      { code: "bad", name: "坏数据" },
     ],
     sw2: [],
     sw3: [],
