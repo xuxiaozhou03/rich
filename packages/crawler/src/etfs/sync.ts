@@ -1,7 +1,7 @@
 import { prisma } from "@quant-backtest/db";
 
 import { runSyncTask, type SyncRunResult } from "../utils/runSyncTask";
-import { fetchEtfs } from "./fetchEtfs";
+import { fetchEtfs } from "./fetch";
 import { persistEtfs } from "./persist";
 
 export async function syncEtfs(): Promise<SyncRunResult> {
