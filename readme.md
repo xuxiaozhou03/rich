@@ -20,7 +20,7 @@ https://github.com/jaeleeps/market-calendar/tree/main
 pnpm --filter @quant-backtest/db db:generate
 pnpm --filter @quant-backtest/db db:push
 
-# 全量：ETF 列表 + 每只 ETF 的关联、持仓、K 线（已成功且没过期的任务自动跳过）
+# 全量：ETF 列表 + 跟踪指数估值 + 每只 ETF 的关联、持仓、K 线（已成功且没过期的任务自动跳过）
 pnpm --filter @rich/crawler sync
 
 # 本地调试：只跑前 5 只 ETF
@@ -42,7 +42,8 @@ pnpm --filter @rich/crawler sync:dev
 交易日来自 [market-calendar](https://github.com/jaeleeps/market-calendar) 的上交所
 日历 SSE（沪深节假日一致），见 `packages/crawler/src/calendar/tradingCalendar.ts`：
 
-- 非交易日（周末、节假日）直接跳过，resultCode 是 `not_a_trading_day`；
+- 非交易日不再直接跳过：仍按最近一个已收盘的交易日判断，空库或该交易日还没
+  成功同步时会补跑，已完成后才跳过；
 - `success` 只在它所属的交易日仍是当前交易日时才算数。当前交易日是最近一个
   **已收盘**的交易日，所以盘中看到的仍是上一个交易日的成功记录，收盘之后
   `updatedAt` 就过期了（`isExpiredSuccess`），任务重跑；
@@ -51,7 +52,7 @@ pnpm --filter @rich/crawler sync:dev
 
 定时任务建议安排在收盘之后（15:00 以后），跑得太早只会拿到尚未更新的数据。
 
-K 线先同步 `dayKV2`，再保存完整的 `subscribeShare` 原始响应。当天（当前交易日）
+K 线先同步 `dayKV2`，再保存 `subscribeShare` 接口的 `datas` 数组。当天（当前交易日）
 的日 K 已经有，就不再从 `subscribeShare` 聚合；只有 `subscribeShare` 的最后日期
 晚于 `dayKV2` 最大日期、确实缺日期时，才会聚合补出缺失的日 K。
 

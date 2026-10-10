@@ -13,9 +13,8 @@ export async function persistSubscribeKlines(
 /** 每只 ETF 只保留一份快照，重复抓取直接覆盖 payload。 */
 export async function persistSubscribeShareSnapshot(
   data: SubscribeShareSnapshotData,
-  raw: unknown,
 ): Promise<void> {
-  const payload = JSON.stringify(raw ?? data.rows);
+  const payload = JSON.stringify(data.rows);
   await prisma.subscribeShareSnapshot.upsert({
     where: { code: data.code },
     create: { code: data.code, payload },

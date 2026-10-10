@@ -84,7 +84,33 @@ model EtfFloatShare {
   @@map("etfFloatShare")
 }
 
-/// subscribeShare 原始快照：每只 ETF 一行，存最近一次抓到的原始响应
+/// 指数估值时序：pe / pb / psTtm / indexGZPer
+model EtfValuation {
+  indexCode  String
+  metric     String
+  date       Int
+  value      Float
+  /// pe / pb / psTtm 的历史分位，indexGZPer 为 null
+  percentile Float?
+
+  @@id([indexCode, metric, date])
+  @@index([indexCode, metric, date])
+  @@map("etfValuation")
+}
+
+/// 每个指数估值指标一行，保存该指标返回的 min / max / mid 范围
+model EtfValuationMetric {
+  indexCode String
+  metric    String
+  min       Float?
+  max       Float?
+  mid       Float?
+
+  @@id([indexCode, metric])
+  @@map("etfValuationMetric")
+}
+
+/// subscribeShare 原始快照：每只 ETF 一行，只保存接口返回的 datas 数组
 model SubscribeShareSnapshot {
   code    String @id
   payload String

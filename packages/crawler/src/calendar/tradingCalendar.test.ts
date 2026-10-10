@@ -49,3 +49,23 @@ test("success 跨过收盘就过期", () => {
     true,
   );
 });
+
+test("非交易日按最近已收盘交易日判断是否过期", () => {
+  const saturday = latestClosedSession(new Date("2026-10-10T04:00:00Z"));
+  assert.equal(saturday.isoDate, "2026-10-09");
+
+  // 周五收盘后完成的 success 仍然有效，周末无需重跑。
+  assert.equal(
+    isExpiredSuccess(new Date("2026-10-09T08:00:00Z"), saturday),
+    false,
+  );
+  // 周四或周五盘中完成的 success 没覆盖周五数据，周末必须补跑。
+  assert.equal(
+    isExpiredSuccess(new Date("2026-10-08T08:00:00Z"), saturday),
+    true,
+  );
+  assert.equal(
+    isExpiredSuccess(new Date("2026-10-09T06:00:00Z"), saturday),
+    true,
+  );
+});

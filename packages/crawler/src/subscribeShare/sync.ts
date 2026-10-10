@@ -6,7 +6,6 @@ import {
   dataResult,
   emptyResult,
   errorResult,
-  isRecord,
 } from "../utils/fetchResult";
 import { getLatestDayKv2Date, hasKlineOn } from "../klines/persist";
 import type { KlineRecord } from "../klines/types";
@@ -74,13 +73,7 @@ export async function syncKlineCalculation(
         );
       }
 
-      const rows = parseSubscribeShareRows(
-        Array.isArray(payload)
-          ? payload
-          : isRecord(payload)
-            ? payload.datas
-            : null,
-      );
+      const rows = parseSubscribeShareRows(payload);
       if (!rows) {
         return errorResult(
           "schema",

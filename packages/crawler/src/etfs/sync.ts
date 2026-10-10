@@ -19,3 +19,23 @@ export async function getEtfCodes(): Promise<string[]> {
   });
   return rows.map((row) => row.code);
 }
+
+/** 去重后的跟踪指数代码，用于抓取指数估值数据。 */
+export async function getTrackIndexes(): Promise<string[]> {
+  const rows = await prisma.etf.findMany({
+    where: {
+      OR: [
+        { trackIndex: { endsWith: ".SH" } },
+        { trackIndex: { endsWith: ".SZ" } },
+        { trackIndex: { endsWith: ".CSI" } },
+      ],
+    },
+    select: { trackIndex: true },
+    orderBy: { scale: "desc" },
+  });
+  return Array.from(
+    new Set(
+      rows.flatMap((row) => (row.trackIndex === null ? [] : [row.trackIndex])),
+    ),
+  );
+}

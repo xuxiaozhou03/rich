@@ -1,9 +1,10 @@
 import { prisma } from "@quant-backtest/db";
 
-import { getEtfCodes, syncEtfs } from "./etfs/sync";
+import { getEtfCodes, getTrackIndexes, syncEtfs } from "./etfs/sync";
 import { syncHoldAll } from "./holdAll/sync";
 import { syncDayKv2 } from "./klines/sync";
 import { syncLinkFund } from "./linkFund/sync";
+import { syncPepb } from "./pepb/sync";
 import { syncKlineCalculation, syncSubscribeShare } from "./subscribeShare/sync";
 
 /** --dev 只跑前几只 ETF，方便本地调试时不用等全量。 */
@@ -15,9 +16,14 @@ function printUsage(): void {
   );
 }
 
-/** 全量：ETF 列表 + 每只 ETF 的关联、持仓与 K 线；--dev 时只跑前 5 只。 */
+/** 全量：ETF 列表 + 跟踪指数估值 + 每只 ETF 的关联、持仓与 K 线；--dev 时只跑前 5 只。 */
 async function syncAll(dev: boolean): Promise<void> {
   await syncEtfs();
+
+  const trackIndexes = await getTrackIndexes();
+  for (const indexCode of dev ? trackIndexes.slice(0, DEV_CODE_LIMIT) : trackIndexes) {
+    await syncPepb(indexCode);
+  }
 
   const codes = await getEtfCodes();
   for (const code of dev ? codes.slice(0, DEV_CODE_LIMIT) : codes) {

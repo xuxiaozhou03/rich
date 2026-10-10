@@ -6,6 +6,7 @@ import type {
   FloatShareRecord,
   KlineRecord,
 } from "./types";
+import { normalizeKlineRecord } from "./values";
 
 type TransactionClient = Prisma.TransactionClient;
 
@@ -58,7 +59,8 @@ export async function upsertKlines(
   tx: TransactionClient,
   records: KlineRecord[],
 ): Promise<void> {
-  for (const record of records) {
+  for (const rawRecord of records) {
+    const record = normalizeKlineRecord(rawRecord);
     const existing = await tx.kline.findUnique({
       where: {
         code_date: {

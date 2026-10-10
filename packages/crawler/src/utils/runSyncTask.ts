@@ -1,10 +1,6 @@
 import { prisma } from "@quant-backtest/db";
 
-import {
-  dateInShanghai,
-  isExpiredSuccess,
-  isTradingDay,
-} from "../calendar/tradingCalendar";
+import { isExpiredSuccess } from "../calendar/tradingCalendar";
 import { errorMessage, type TaskOutcome } from "./fetchResult";
 
 export interface SyncRunResult {
@@ -51,25 +47,21 @@ async function failTask(
 
 /**
  * 每个任务每个交易日只成功执行一次：成功的记录看 updatedAt 有没有跨过收盘
- * （交易日推进），没过期就直接跳过；非交易日整体跳过。失败（含接口成功但没数据）
- * 会记下原因并在下次运行时重试。
+ * （交易日推进），没过期就直接跳过。非交易日不直接跳过，仍按最近一个已收盘
+ * 交易日判断，因此空库或上一交易日未同步时会在周末/节假日补跑。
+ * 失败（含接口成功但没数据）会记下原因并在下次运行时重试。
  */
 export async function runSyncTask<T>(
   options: RunSyncTaskOptions<T>,
 ): Promise<SyncRunResult> {
   const taskKey = options.taskKey;
 
-  if (!isTradingDay(dateInShanghai())) {
-    logTask(taskKey, "跳过：非交易日");
-    return { taskKey, status: "skipped", resultCode: "not_a_trading_day" };
-  }
-
   const done = await prisma.syncTask.findUnique({
     where: { taskKey },
     select: { status: true, updatedAt: true },
   });
   if (done?.status === "success" && !isExpiredSuccess(done.updatedAt)) {
-    logTask(taskKey, "跳过：今日已同步");
+    logTask(taskKey, "跳过：最新交易日已同步");
     return { taskKey, status: "skipped", resultCode: "synced" };
   }
 
