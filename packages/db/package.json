@@ -1,5 +1,5 @@
 {
-  "name": "@quant-backtest/db",
+  "name": "@rich/db",
   "version": "0.1.0",
   "private": true,
   "description": "存储基础设施：Prisma schema + PrismaClient（不承担业务读写）",

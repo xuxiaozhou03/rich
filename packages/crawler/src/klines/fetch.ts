@@ -1,44 +1,90 @@
-import { fetchCheeseApi } from "../utils/fetchCheeseApi";
-import {
-  dataResult,
-  emptyResult,
-  errorResult,
-  type FetchResult,
-} from "../utils/fetchResult";
-import { obfuscateTimestamp } from "../utils/obfuscateTimestamp";
-import {
-  buildAdjustFactors,
-  buildDayKv2Klines,
-  buildFloatShares,
-  parseDayKv2Payload,
-} from "./parsers";
-import type { DayKv2Data } from "./types";
+import { Kline } from "@rich/db";
+import dayjs from "dayjs";
 
-export async function fetchDayKv2(
-  code = "159502.SZ",
-): Promise<FetchResult<DayKv2Data>> {
-  const timestamp = Date.now();
-  const response = await fetchCheeseApi<unknown>({
-    timestamp,
-    url: `https://stock.cheesefortune.com/api/v4/dayKV2/${code.replace(".", "")}?t=${obfuscateTimestamp(timestamp)}`,
-    Referer: `https://stock.cheesefortune.com/security/etf/${code}?blank=true`,
-  });
-  if (response.kind !== "data") return response;
-
-  const payload = parseDayKv2Payload(response.data);
-  if (!payload) {
-    return errorResult("schema", "dayKV2 返回结构不正确", false);
-  }
-  if (payload.list.length === 0) {
-    return emptyResult("dayKV2 没有 K 线数据", response.raw);
-  }
-
-  return dataResult(
+const fetchPageKline = async (code: string, begin: number, count = 1000) => {
+  const res = await fetch(
+    `https://hongsehuojian.com/fundex-quote/line/kline?securityCode=${code}&count=-${count}&begin=${begin}&period=day&adjust=1&ts=${Date.now()}`,
     {
-      klines: buildDayKv2Klines(code, payload),
-      factors: buildAdjustFactors(code, payload),
-      floatShares: buildFloatShares(code, payload),
+      headers: {
+        accept: "application/json, text/plain, */*",
+        "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
+        "cache-control": "no-cache",
+        pla: "rr_Mac",
+        pragma: "no-cache",
+        pro: "RedRocket-PC",
+        "sec-ch-ua":
+          '"Chromium";v="152", "Not?A_Brand";v="24", "Google Chrome";v="152"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"macOS"',
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        ver: "",
+        Referer: `https://hongsehuojian.com/index/h5/fundexh5bai/index.html?targetPage=indexDetail&securityCode=${code}&pro=RedRocket-PC`,
+      },
+      body: null,
+      method: "GET",
     },
-    response.raw,
   );
-}
+  const ret = (await res.json()) as {
+    data: {
+      columns: string;
+      items: string;
+    };
+  };
+  const columns = ret.data.columns.split(",");
+  if (!ret.data?.items) {
+    return [];
+  }
+  const items = ret.data.items.split(";").map((item) => {
+    const values = item.split(",");
+    return columns.reduce(
+      (acc, column, index) => {
+        if (column === "week") {
+          return acc;
+        }
+
+        const value = values[index];
+        if (column === "tradeDate") {
+          acc.date = Number(value.replace(/-/g, ""));
+          return acc;
+        }
+        acc[column as "open"] = Number(value);
+        return acc;
+      },
+      {
+        code,
+      } as Kline,
+    );
+  });
+  return items;
+};
+
+export const fetchKline = async (code: string) => {
+  const count = 1000;
+  const today = +dayjs().format("YYYYMMDD");
+  let begin = today;
+  const kline: Kline[] = [];
+
+  while (true) {
+    console.log(
+      `Fetching Kline data for ETF: ${code} with begin date: ${begin}`,
+    );
+    const data = await fetchPageKline(code, begin, count);
+    if (!data || data.length === 0) {
+      break;
+    }
+
+    if (begin !== today) {
+      kline.unshift(...data.slice(0, data.length - 2));
+    } else {
+      kline.unshift(...data);
+    }
+
+    if (data.length < count) {
+      break;
+    }
+    begin = data[0].date;
+  }
+  return kline;
+};

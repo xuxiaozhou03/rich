@@ -13,7 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@quant-backtest/db": "workspace:*",
+    "@rich/db": "workspace:*",
+    "dayjs": "^1.11.23",
     "crypto-js": "^4.2.0",
     "market-calendar": "^1.1.1"
   },

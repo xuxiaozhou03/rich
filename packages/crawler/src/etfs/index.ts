@@ -1,32 +1,24 @@
-import { prisma } from "@quant-backtest/db";
-import { SyncRunResult, runSyncTask } from "../utils/runSyncTask";
-import { EtfRecord, fetchEtfs } from "./fetch";
+import { Prisma, prisma } from "@quant-backtest/db";
+import { RunTaskOptions } from "../utils/runTask";
+import { fetchEtfs } from "./fetch";
 
-async function persistEtfs(records: EtfRecord[]): Promise<void> {
-  await prisma.$transaction(async (tx) => {
-    for (const record of records) {
-      await tx.etf.upsert({
-        where: { code: record.code },
-        create: record,
-        update: {
-          name: record.name,
-          scale: record.scale,
-          trackingIndex: record.trackingIndex,
-          trackIndex: record.trackIndex,
-        },
+export const etfsTask: RunTaskOptions<Prisma.EtfCreateInput[]> = {
+  name: "etfs",
+  execute: fetchEtfs,
+  persist: async (data) => {
+    await prisma.$transaction(async (tx) => {
+      for (const record of data) {
+        await tx.etf.upsert({
+          where: { code: record.code },
+          create: record,
+          update: record,
+        });
+      }
+
+      // 还需要清除其他
+      await tx.etf.deleteMany({
+        where: { code: { notIn: data.map((record) => record.code) } },
       });
-    }
-
-    await tx.etf.deleteMany({
-      where: { code: { notIn: records.map((record) => record.code) } },
     });
-  });
-}
-
-export async function syncEtfs(): Promise<SyncRunResult> {
-  return runSyncTask({
-    taskKey: "etf_list",
-    execute: fetchEtfs,
-    persist: persistEtfs,
-  });
-}
+  },
+};

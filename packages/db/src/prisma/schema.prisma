@@ -17,30 +17,30 @@ model Etf {
   // 分类
   category    String
 
-  scale Float?
+  scale Float
 
   @@map("etfs")
 }
 
 /// ETF关联关系
-model LinkEtf {
+model Link {
   target  String
   source  String
   similar Float?
 
   @@id([target, source])
-  @@map("linkEtfs")
+  @@map("links")
 }
 
 /// ETF持仓
-model EtfHolding {
-  etfCode      String
-  securityCode String
-  name         String
-  holdScale    Float
+model Holding {
+  code      String
+  stockCode String
+  stockName String
+  holdScale Float
 
-  @@id([etfCode, securityCode])
-  @@map("etfHolding")
+  @@id([code, stockCode])
+  @@map("holdings")
 }
 
 /// 日K线数据
@@ -58,51 +58,40 @@ model Kline {
   changePercent Float
 
   @@id([code, date])
-  @@map("kline")
+  @@map("klines")
 }
 
-/// 指数估值时序：pe / pb / psTtm / indexGZPer
-model EtfValuation {
-  indexCode  String
-  metric     String
-  date       Int
-  value      Float
-  /// pe / pb / psTtm 的历史分位，indexGZPer 为 null
-  percentile Float?
-
-  @@id([indexCode, metric, date])
-  @@index([indexCode, metric, date])
-  @@map("etfValuation")
-}
-
-/// 每个指数估值指标一行，保存该指标返回的 min / max / mid 范围
-model EtfValuationMetric {
+/// 指数估值
+model Valuation {
   indexCode String
-  metric    String
-  min       Float?
-  max       Float?
-  mid       Float?
+  // type: "PE" | "PB" | "PS"
+  type      String
+  date      Int
+  value     Float
+  percent   Float?
+  peg       Float?
 
-  @@id([indexCode, metric])
-  @@map("etfValuationMetric")
+  @@id([indexCode, type, date])
+  @@index([indexCode, type, date])
+  @@map("valuations")
 }
 
 /// 指数申万行业权重：level 1 / 2 / 3
-model IndexSwIndustry {
+model Sw {
   indexCode    String
   level        Int
   industryCode String
-  name         String
+  industryName String
   weight       Float
 
   @@id([indexCode, level, industryCode])
   @@index([indexCode, level, weight])
-  @@map("indexSwIndustry")
+  @@map("sws")
 }
 
 /// 同步任务状态：每个任务一行，形如 day_kv2:513050.SH
-model SyncTask {
-  taskKey   String   @id
+model Task {
+  name      String   @id
   /// success | failed
   status    String
   /// 失败原因，success 时为 null
@@ -110,5 +99,5 @@ model SyncTask {
   /// 上次运行（写库）时间：success 靠它判断是否已经跨交易日（交易日历见 crawler）
   updatedAt DateTime @updatedAt
 
-  @@map("syncTask")
+  @@map("tasks")
 }
