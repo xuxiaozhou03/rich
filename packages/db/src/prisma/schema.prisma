@@ -1,6 +1,3 @@
-// 量化回测系统 Prisma Schema
-// 模型：ETF、关联关系、持仓、日K、subscribeShare 原始快照、同步任务状态
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,24 +9,27 @@ datasource db {
 
 /// ETF基础信息
 model Etf {
-  code          String   @id
-  name          String
-  trackingIndex String
-  trackIndex    String?
-  scale         Float?
+  code        String  @id
+  name        String
+  indexCode   String
+  indexName   String?
+  premiumRate Float?
+  // 分类
+  category    String
 
-  @@map("etf")
+  scale Float?
+
+  @@map("etfs")
 }
 
 /// ETF关联关系
 model LinkEtf {
-  target    String
-  source    String
-  similar   Float?
+  target  String
+  source  String
+  similar Float?
 
   @@id([target, source])
-  @@index([source])
-  @@map("linkEtf")
+  @@map("linkEtfs")
 }
 
 /// ETF持仓
@@ -46,8 +46,8 @@ model EtfHolding {
 /// 日K线数据
 model Kline {
   code          String
+  // 格式：YYYYMMDD
   date          Int
-  preClose      Float
   open          Float
   high          Float
   low           Float
@@ -56,32 +56,9 @@ model Kline {
   amount        Float
   change        Float
   changePercent Float
-  source        String
 
   @@id([code, date])
-  @@index([code, source, date])
   @@map("kline")
-}
-
-/// 复权因子（稀疏：仅在上市首日与除权除息日各一行）
-/// 后复权价 = kline 原始价 * 当日生效的 factor，早于首条记录时 factor 为 1
-model EtfAdjustFactor {
-  code      String
-  date      Int
-  factor    Float
-
-  @@id([code, date])
-  @@map("etfAdjustFactor")
-}
-
-/// 每日份额：份额 * 收盘价 即当日规模，份额环比变化即申赎资金流
-model EtfFloatShare {
-  code      String
-  date      Int
-  shares    Float
-
-  @@id([code, date])
-  @@map("etfFloatShare")
 }
 
 /// 指数估值时序：pe / pb / psTtm / indexGZPer
@@ -112,23 +89,15 @@ model EtfValuationMetric {
 
 /// 指数申万行业权重：level 1 / 2 / 3
 model IndexSwIndustry {
-  indexCode      String
-  level          Int
-  industryCode   String
-  name           String
-  weight         Float
+  indexCode    String
+  level        Int
+  industryCode String
+  name         String
+  weight       Float
 
   @@id([indexCode, level, industryCode])
   @@index([indexCode, level, weight])
   @@map("indexSwIndustry")
-}
-
-/// subscribeShare 原始快照：每只 ETF 一行，只保存接口返回的 datas 数组
-model SubscribeShareSnapshot {
-  code    String @id
-  payload String
-
-  @@map("subscribeShareSnapshot")
 }
 
 /// 同步任务状态：每个任务一行，形如 day_kv2:513050.SH
@@ -142,82 +111,4 @@ model SyncTask {
   updatedAt DateTime @updatedAt
 
   @@map("syncTask")
-}
-
-/// 回测运行记录（策略以 TS 文件管理，这里只存 id，不建策略表）
-model BacktestRun {
-  id                 String   @id
-  strategyId         String
-  /// 运行时 Git commit hash
-  gitCommit          String?
-  /// 策略参数 JSON
-  params             String
-  startDate          Int
-  endDate            Int
-  /// 前复权基准日（= endDate）
-  adjustBaseDate     Int
-  /// 标的池定义 JSON
-  universe           String
-  initCash           Float
-  /// 成本模型 JSON
-  costModel          String
-  /// 前复权快照哈希，用于复现校验
-  adjustSnapshotHash String
-  /// 行情数据版本标识
-  dataVersion        String
-  /// pending | running | success | failed
-  status             String
-  errorMessage       String?
-  /// 绩效指标 JSON
-  metrics            String?
-  createdAt          DateTime @default(now())
-  startedAt          DateTime?
-  finishedAt         DateTime?
-
-  trades BacktestTrade[]
-  equity BacktestEquity[]
-
-  @@index([strategyId])
-  @@index([createdAt])
-  @@map("backtestRun")
-}
-
-/// 回测交易流水
-model BacktestTrade {
-  id             Int         @id @default(autoincrement())
-  runId          String
-  run            BacktestRun @relation(fields: [runId], references: [id], onDelete: Cascade)
-  date           Int
-  code           String
-  side           String
-  /// 原始成交价（不复权）
-  price          Float
-  /// 信号时看到的前复权价
-  indicatorPrice Float
-  shares         Float
-  amount         Float
-  fee            Float
-  slippage       Float
-  reason         String
-
-  @@index([runId])
-  @@map("backtestTrade")
-}
-
-/// 回测每日净值
-model BacktestEquity {
-  id          Int         @id @default(autoincrement())
-  runId       String
-  run         BacktestRun @relation(fields: [runId], references: [id], onDelete: Cascade)
-  date        Int
-  cash        Float
-  marketValue Float
-  totalValue  Float
-  nav         Float
-  drawdown    Float
-  /// code -> 持仓份额 JSON
-  positions   String
-
-  @@index([runId])
-  @@map("backtestEquity")
 }
