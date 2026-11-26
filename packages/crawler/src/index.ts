@@ -11,7 +11,7 @@ import { runTask, TaskOptions, runTasks } from "@rich/utils";
 const DEV_CODE_LIMIT = 2;
 
 /** 全量：ETF 列表 + 跟踪指数估值 + 每只 ETF 的关联、持仓与 K 线；--dev 时只跑前 5 只。 */
-export async function run(dev: boolean): Promise<void> {
+export async function runCrawler(dev: boolean): Promise<void> {
   await runTask(etfsTask);
 
   const etfs = await prisma.etf.findMany({

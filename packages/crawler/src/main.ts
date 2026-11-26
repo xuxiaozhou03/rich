@@ -1,5 +1,5 @@
 import { prisma } from "@rich/db";
-import { run } from ".";
+import { runCrawler } from ".";
 
 function printUsage(): void {
   console.log(
@@ -18,7 +18,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  await run(argv.includes("--dev"));
+  await runCrawler(argv.includes("--dev"));
 }
 
 main()
