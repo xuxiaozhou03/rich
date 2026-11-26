@@ -8,6 +8,25 @@ importers:
 
   .: {}
 
+  packages/calculation:
+    dependencies:
+      '@rich/db':
+        specifier: workspace:*
+        version: link:../db
+      trading-signals:
+        specifier: ^8.4.1
+        version: 8.4.1
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.0
+        version: 20.19.43
+      tsx:
+        specifier: ^4.19.2
+        version: 4.23.15
+      typescript:
+        specifier: ^5.5.4
+        version: 5.9.3
+
   packages/crawler:
     dependencies:
       '@rich/db':
@@ -273,6 +292,9 @@ packages:
     engines: {node: '>=16.13'}
     hasBin: true
 
+  trading-signals@8.4.1:
+    resolution: {integrity: sha512-XVXaHgS92L5dKomlBai9Nic3h4TGxp762WObuKZL2eDPornanFQtzWEjc6NEJ7i2nZhYXBTjr5YCkZetvboQZQ==}
+
   tsx@4.23.15:
     resolution: {integrity: sha512-Yiex1Ovn8z2xPpOWckIiysV1SSyRMY9BkLF++q0yKiDxCqRhosKfMg3janKkiLBwZ5c/YryloKwGZcrEmtwxKw==}
     engines: {node: '>=18.0.0'}
@@ -447,6 +469,8 @@ snapshots:
       '@prisma/engines': 5.22.0
     optionalDependencies:
       fsevents: 2.3.3
+
+  trading-signals@8.4.1: {}
 
   tsx@4.23.15:
     dependencies:

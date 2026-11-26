@@ -1,0 +1,377 @@
+{
+  "code": "510300.SH",
+  "date": 20261125,
+  "market": {
+    "open": 4.004,
+    "high": 4.013,
+    "low": 3.962,
+    "close": 3.97,
+    "volume": 19830746,
+    "amount": 7911780500,
+    "change": -0.063,
+    "changePercent": -1.56,
+    "amplitude": 0.01264567319613184,
+    "return": -0.015621125712868889,
+    "body": -0.033999999999999364,
+    "bodyRatio": -0.666666666666658,
+    "upperShadow": 0.009000000000000341,
+    "lowerShadow": 0.008000000000000007,
+    "upperShadowRatio": 0.1764705882353018,
+    "lowerShadowRatio": 0.15686274509804024,
+    "averageVolume20": 20207468.999,
+    "averageAmount20": 8250243432.75,
+    "volumeRatio": 0.9813572397899686,
+    "amountRatio": 0.9589754004825549
+  },
+  "periods": {
+    "1w": {
+      "performance": {
+        "return": -0.02168555938886141,
+        "annualizedReturn": -0.6811988260254309,
+        "averageDailyReturn": -0.004348598458760744,
+        "winRate": 0.6,
+        "bestDailyReturn": 0.002485707183693897,
+        "worstDailyReturn": -0.015621125712868889
+      },
+      "performanceAnalyze": "近1周累计收益-2.2%，区间收益接近持平，略有亏损。上涨交易日占比60.0%。期间最大单日涨幅0.2%，最大单日跌幅-1.6%。",
+      "risk": {
+        "volatility": 0.129075871482168,
+        "downsideVolatility": 0.13301189919255413,
+        "maxDrawdown": -0.02216748768472887,
+        "currentDrawdown": -0.02216748768472887,
+        "maxDrawdownDuration": 6,
+        "currentDrawdownDuration": 6,
+        "sharpeRatio": -8.489943155325513,
+        "sortinoRatio": -8.238712613382878,
+        "calmarRatio": -30.72963592959193,
+        "var95": 0.014565866087536473,
+        "cvar95": 0.015621125712868889
+      },
+      "riskAnalyze": "近1周年化波动率12.9%，波动相对适中，最大回撤-2.2%，当前回撤-2.2%，夏普比率-8.49，风险调整后收益为负。"
+    },
+    "1m": {
+      "performance": {
+        "return": -0.049784585926280434,
+        "annualizedReturn": -0.4315416300365448,
+        "averageDailyReturn": -0.0021814321000372754,
+        "winRate": 0.5652173913043478,
+        "bestDailyReturn": 0.020283479960899298,
+        "worstDailyReturn": -0.016924910607866606
+      },
+      "performanceAnalyze": "近1月累计收益-5.0%，区间收益接近持平，略有亏损。上涨交易日占比56.5%。期间最大单日涨幅2.0%，最大单日跌幅-1.7%。",
+      "risk": {
+        "volatility": 0.13843151450370753,
+        "downsideVolatility": 0.11613614875611553,
+        "maxDrawdown": -0.05363528009535168,
+        "currentDrawdown": -0.05363528009535168,
+        "maxDrawdownDuration": 20,
+        "currentDrawdownDuration": 20,
+        "sharpeRatio": -3.971067507136683,
+        "sortinoRatio": -4.733417588728558,
+        "calmarRatio": -8.045853946681346,
+        "var95": 0.015399046642419523,
+        "cvar95": 0.016273018160367747
+      },
+      "riskAnalyze": "近1月年化波动率13.8%，波动相对适中，最大回撤-5.4%，当前回撤-5.4%，夏普比率-3.97，风险调整后收益为负。"
+    },
+    "3m": {
+      "performance": {
+        "return": -0.13994800693240894,
+        "annualizedReturn": -0.450163089825666,
+        "averageDailyReturn": -0.002475495476801104,
+        "winRate": 0.43333333333333335,
+        "bestDailyReturn": 0.020283479960899298,
+        "worstDailyReturn": -0.02170542635658912
+      },
+      "performanceAnalyze": "近3月累计收益-14.0%，区间收益表现偏弱。上涨交易日占比43.3%。期间最大单日涨幅2.0%，最大单日跌幅-2.2%。",
+      "risk": {
+        "volatility": 0.13197511876658072,
+        "downsideVolatility": 0.11655673064413967,
+        "maxDrawdown": -0.15369857173310586,
+        "currentDrawdown": -0.15369857173310586,
+        "maxDrawdownDuration": 90,
+        "currentDrawdownDuration": 90,
+        "sharpeRatio": -4.726836891559939,
+        "sortinoRatio": -5.3521135734193095,
+        "calmarRatio": -2.928869700932317,
+        "var95": 0.016369121347386845,
+        "cvar95": 0.019089443265332278
+      },
+      "riskAnalyze": "近3月年化波动率13.2%，波动相对适中，最大回撤-15.4%，当前回撤-15.4%，夏普比率-4.73，风险调整后收益为负。"
+    },
+    "6m": {
+      "performance": {
+        "return": -0.19586793599351837,
+        "annualizedReturn": -0.3510692792095188,
+        "averageDailyReturn": -0.001671207956266918,
+        "winRate": 0.456,
+        "bestDailyReturn": 0.0294623655913977,
+        "worstDailyReturn": -0.03450452345886801
+      },
+      "performanceAnalyze": "近6月累计收益-19.6%，区间出现较大幅度下跌。上涨交易日占比45.6%。期间最大单日涨幅2.9%，最大单日跌幅-3.5%。",
+      "risk": {
+        "volatility": 0.1898910907220447,
+        "downsideVolatility": 0.15184983166972016,
+        "maxDrawdown": -0.22019249656256135,
+        "currentDrawdown": -0.22019249656256135,
+        "maxDrawdownDuration": 156,
+        "currentDrawdownDuration": 156,
+        "sharpeRatio": -2.2178207696732777,
+        "sortinoRatio": -2.7734268806782105,
+        "calmarRatio": -1.5943743982655312,
+        "var95": 0.02165919964401588,
+        "cvar95": 0.028187733813835467
+      },
+      "riskAnalyze": "近6月年化波动率19.0%，波动相对适中，最大回撤-22.0%，当前回撤-22.0%，夏普比率-2.22，风险调整后收益为负。"
+    },
+    "ytd": {
+      "performance": {
+        "return": -0.14310382041873515,
+        "annualizedReturn": -0.15746288019648946,
+        "averageDailyReturn": -0.0006515964745792752,
+        "winRate": 0.47685185185185186,
+        "bestDailyReturn": 0.03508771929824572,
+        "worstDailyReturn": -0.03450452345886801
+      },
+      "performanceAnalyze": "今年以来累计收益-14.3%，区间收益表现偏弱。上涨交易日占比47.7%。期间最大单日涨幅3.5%，最大单日跌幅-3.5%。",
+      "risk": {
+        "volatility": 0.17862398553416273,
+        "downsideVolatility": 0.13392023608025197,
+        "maxDrawdown": -0.22019249656256135,
+        "currentDrawdown": -0.22019249656256135,
+        "maxDrawdownDuration": 156,
+        "currentDrawdownDuration": 156,
+        "sharpeRatio": -0.9192623885473256,
+        "sortinoRatio": -1.226120236941479,
+        "calmarRatio": -0.7151146503838787,
+        "var95": 0.018133490269719443,
+        "cvar95": 0.026626717562459754
+      },
+      "riskAnalyze": "今年以来年化波动率17.9%，波动相对适中，最大回撤-22.0%，当前回撤-22.0%，夏普比率-0.92，风险调整后收益为负。"
+    },
+    "1y": {
+      "performance": {
+        "return": -0.11403704530238779,
+        "annualizedReturn": -0.11403704530238779,
+        "averageDailyReturn": -0.00044147756956407685,
+        "winRate": 0.48760330578512395,
+        "bestDailyReturn": 0.03508771929824572,
+        "worstDailyReturn": -0.03450452345886801
+      },
+      "performanceAnalyze": "近1年累计收益-11.4%，区间收益表现偏弱。上涨交易日占比48.8%。期间最大单日涨幅3.5%，最大单日跌幅-3.5%。",
+      "risk": {
+        "volatility": 0.172230174009471,
+        "downsideVolatility": 0.1278894044879688,
+        "maxDrawdown": -0.22019249656256135,
+        "currentDrawdown": -0.22019249656256135,
+        "maxDrawdownDuration": 156,
+        "currentDrawdownDuration": 156,
+        "sharpeRatio": -0.6459515480953388,
+        "sortinoRatio": -0.8699105916988882,
+        "calmarRatio": -0.5178970540896132,
+        "var95": 0.017692548545108544,
+        "cvar95": 0.02527357929433263
+      },
+      "riskAnalyze": "近1年年化波动率17.2%，波动相对适中，最大回撤-22.0%，当前回撤-22.0%，夏普比率-0.65，风险调整后收益为负。"
+    },
+    "2y": {
+      "performance": {
+        "return": 0.059514278089138006,
+        "annualizedReturn": 0.029327099657411093,
+        "averageDailyReturn": 0.00017199704877930914,
+        "winRate": 0.5216494845360825,
+        "bestDailyReturn": 0.03508771929824572,
+        "worstDailyReturn": -0.06677265500794916
+      },
+      "performanceAnalyze": "近2年累计收益6.0%，区间收益表现较好。上涨交易日占比52.2%。期间最大单日涨幅3.5%，最大单日跌幅-6.7%。",
+      "risk": {
+        "volatility": 0.1628745884165554,
+        "downsideVolatility": 0.11978845564926335,
+        "maxDrawdown": -0.22019249656256135,
+        "currentDrawdown": -0.22019249656256135,
+        "maxDrawdownDuration": 156,
+        "currentDrawdownDuration": 156,
+        "sharpeRatio": 0.2661142951381376,
+        "sortinoRatio": 0.3618316644743591,
+        "calmarRatio": 0.13318846062076709,
+        "var95": 0.016909802623524307,
+        "cvar95": 0.024815573941016415
+      },
+      "riskAnalyze": "近2年年化波动率16.3%，波动相对适中，最大回撤-22.0%，当前回撤-22.0%，夏普比率0.27，风险调整后收益表现一般。"
+    },
+    "3y": {
+      "performance": {
+        "return": 0.1801426872770513,
+        "annualizedReturn": 0.056658028860614884,
+        "averageDailyReturn": 0.0002965135223480891,
+        "winRate": 0.5055096418732782,
+        "bestDailyReturn": 0.09408893709327537,
+        "worstDailyReturn": -0.08822829964328183
+      },
+      "performanceAnalyze": "近3年累计收益18.0%，区间收益表现突出。上涨交易日占比50.6%。期间最大单日涨幅9.4%，最大单日跌幅-8.8%。",
+      "risk": {
+        "volatility": 0.1858472523899553,
+        "downsideVolatility": 0.12568074408685675,
+        "maxDrawdown": -0.22019249656256135,
+        "currentDrawdown": -0.22019249656256135,
+        "maxDrawdownDuration": 156,
+        "currentDrawdownDuration": 156,
+        "sharpeRatio": 0.4020581777283085,
+        "sortinoRatio": 0.5945334599553229,
+        "calmarRatio": 0.25731135140891204,
+        "var95": 0.01683443325501316,
+        "cvar95": 0.025467507583018283
+      },
+      "riskAnalyze": "近3年年化波动率18.6%，波动相对适中，最大回撤-22.0%，当前回撤-22.0%，夏普比率0.40，风险调整后收益表现一般。"
+    },
+    "5y": {
+      "performance": {
+        "return": -0.11836553408838546,
+        "annualizedReturn": -0.024867335517241074,
+        "averageDailyReturn": -0.000040081561287712616,
+        "winRate": 0.47851239669421486,
+        "bestDailyReturn": 0.09408893709327537,
+        "worstDailyReturn": -0.08822829964328183
+      },
+      "performanceAnalyze": "近5年累计收益-11.8%，区间收益表现偏弱。上涨交易日占比47.9%。期间最大单日涨幅9.4%，最大单日跌幅-8.8%。",
+      "risk": {
+        "volatility": 0.17978359810625774,
+        "downsideVolatility": 0.12439054746744754,
+        "maxDrawdown": -0.3486926703814831,
+        "currentDrawdown": -0.22019249656256135,
+        "maxDrawdownDuration": 785,
+        "currentDrawdownDuration": 156,
+        "sharpeRatio": -0.05618172931734204,
+        "sortinoRatio": -0.08120032952782727,
+        "calmarRatio": -0.07131591120064341,
+        "var95": 0.016745847769242834,
+        "cvar95": 0.024812286237974903
+      },
+      "riskAnalyze": "近5年年化波动率18.0%，波动相对适中，最大回撤-34.9%，当前回撤-22.0%，夏普比率-0.06，风险调整后收益为负。"
+    },
+    "all": {
+      "performance": {
+        "return": 0.9318734793187347,
+        "annualizedReturn": 0.04644661963185337,
+        "averageDailyReturn": 0.00028432588876994136,
+        "winRate": 0.49389030974708725,
+        "bestDailyReturn": 0.09989521480964014,
+        "worstDailyReturn": -0.09996856334486015
+      },
+      "performanceAnalyze": "成立以来累计收益93.2%，区间收益表现突出。上涨交易日占比49.4%。期间最大单日涨幅10.0%，最大单日跌幅-10.0%。",
+      "risk": {
+        "volatility": 0.2209181097764929,
+        "downsideVolatility": 0.15606698743938857,
+        "maxDrawdown": -0.45452473216320943,
+        "currentDrawdown": -0.2442413858747382,
+        "maxDrawdownDuration": 234,
+        "currentDrawdownDuration": 2114,
+        "sharpeRatio": 0.3243288838679411,
+        "sortinoRatio": 0.4590985265083805,
+        "calmarRatio": 0.10218722182795424,
+        "var95": 0.019176822077207265,
+        "cvar95": 0.03296420302007209
+      },
+      "riskAnalyze": "成立以来年化波动率22.1%，波动较为明显，最大回撤-45.5%，当前回撤-24.4%，夏普比率0.32，风险调整后收益表现一般。"
+    }
+  },
+  "technical": {
+    "movingAverages": {
+      "ma5": 4.0207999999999995,
+      "ma10": 4.0455,
+      "ma20": 4.085849999999999,
+      "ma30": 4.1193,
+      "ma60": 4.333683333333334,
+      "ma120": 4.566341666666667,
+      "ma250": 4.627788000000004
+    },
+    "movingAveragesAnalyze": "短中期均线呈空头排列，均线系统整体偏弱。",
+    "maDeviation": {
+      "ma5": -0.01263430163151591,
+      "ma10": -0.018662711654925057,
+      "ma20": -0.028353953277775457,
+      "ma30": -0.03624402204258004,
+      "ma60": -0.08392014491137267,
+      "ma120": -0.13059506059737835,
+      "ma250": -0.1421387496575045
+    },
+    "maDeviationAnalyze": "收盘价位于20日均线附近或略低于均线。",
+    "maDirection": {
+      "ma5": -0.012136995725025912,
+      "ma10": -0.015334063526834751,
+      "ma20": -0.007710802409170769,
+      "ma30": -0.013325562084823606,
+      "ma60": -0.011879291802680325,
+      "ma120": -0.008186662419182977,
+      "ma250": -0.002784917486799432
+    },
+    "maDirectionAnalyze": "20日均线变化较小，短期趋势相对平缓。",
+    "maArrangement": { "bullish": 0, "bearish": 1 },
+    "maArrangementAnalyze": "MA5、MA10、MA20、MA60 呈空头排列。",
+    "macd": {
+      "dif": -0.07061436939540577,
+      "dea": -0.0718458535072953,
+      "histogram": 0.0012314841118895303,
+      "previousHistogram": 0.004336603070719258,
+      "difDeaDifference": 0.0012314841118895303
+    },
+    "macdAnalyze": "DIF 位于 DEA 上方，但仍处于零轴下方，短期出现偏多信号。",
+    "rsi": {
+      "rsi6": 20.703969589676802,
+      "rsi12": 27.384265311224738,
+      "rsi24": 31.23271153320789
+    },
+    "rsiAnalyze": "短期 RSI 处于相对低位，市场短期偏弱。",
+    "bollinger": {
+      "upper": 4.1961700344452435,
+      "middle": 4.085849999999999,
+      "lower": 3.9755299655547542,
+      "bandwidth": 0.05400102032392019,
+      "percentB": -0.025063287835985697
+    },
+    "bollingerAnalyze": "价格跌破布林下轨，短期处于明显弱势区间。",
+    "atr": {
+      "atr14": 0.06506473574543231,
+      "atr20": 0.06610208596826019,
+      "atr14Percent": 0.016389102202879674,
+      "atr20Percent": 0.016650399488226747
+    },
+    "atrAnalyze": "短期与中期 ATR 接近，价格波动水平相对稳定。",
+    "trend": {
+      "shortTerm": -0.007710802409170769,
+      "mediumTerm": -0.04457084486185947,
+      "longTerm": -0.04124010771069275
+    },
+    "trendAnalyze": "短中长期趋势均向下，整体趋势偏弱。",
+    "momentum": {
+      "momentum5": -0.02168555938886141,
+      "momentum10": -0.04337349397590362,
+      "momentum20": -0.043834296724470145,
+      "momentum60": -0.13994800693240894
+    },
+    "momentumAnalyze": "短期和中期动量均为负值，整体上涨动能不足。"
+  },
+  "valuation": {
+    "pe": {
+      "value": 13.4629,
+      "percentile": 0.7433,
+      "peg": -39.8872,
+      "dataDate": 20261124
+    },
+    "peAnalyze": "当前PE处于历史0.7433%分位，估值处于历史极低区域。",
+    "pb": {
+      "value": 1.3373,
+      "percentile": 0.3448,
+      "peg": -39.8872,
+      "dataDate": 20261124
+    },
+    "pbAnalyze": "当前PB处于历史0.3448%分位，估值处于历史极低区域。",
+    "ps": {
+      "value": 1.4504,
+      "percentile": 0.7384000000000001,
+      "peg": null,
+      "dataDate": 20261124
+    },
+    "psAnalyze": "当前PS处于历史0.7384000000000001%分位，估值处于历史极低区域。"
+  }
+}

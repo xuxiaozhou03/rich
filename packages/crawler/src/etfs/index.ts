@@ -1,4 +1,4 @@
-import { Prisma, prisma } from "@quant-backtest/db";
+import { Prisma, prisma } from "@rich/db";
 import { RunTaskOptions } from "../utils/runTask";
 import { fetchEtfs } from "./fetch";
 
