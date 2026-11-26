@@ -1,5 +1,5 @@
 {
-  "name": "@rich/feature_engine",
+  "name": "@rich/utils",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.ts",
