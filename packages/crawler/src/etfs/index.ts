@@ -1,10 +1,13 @@
-import { Prisma, prisma } from "@rich/db";
-import { RunTaskOptions } from "../utils/runTask";
+import { Etf, prisma } from "@rich/db";
 import { fetchEtfs } from "./fetch";
+import { TaskOptions } from "@rich/utils/src/runTask";
 
-export const etfsTask: RunTaskOptions<Prisma.EtfCreateInput[]> = {
+export const etfsTask: TaskOptions<Etf[]> = {
   name: "etfs",
   execute: fetchEtfs,
+  validate(data) {
+    return true;
+  },
   persist: async (data) => {
     await prisma.$transaction(async (tx) => {
       for (const record of data) {

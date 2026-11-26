@@ -1,13 +1,15 @@
 import { Links, prisma } from "@rich/db";
-import { fetchCheeseApi, generateV4Timestamp } from "../utils/fetchCheeseApi";
-import { RunTaskOptions } from "../utils/runTask";
+import { TaskOptions, generateV4Timestamp, fetchCheeseApi } from "@rich/utils";
 
 export const getLinkFundTask = (
   code: string,
   codes: string[],
-): RunTaskOptions<Links[]> => {
+): TaskOptions<Links[]> => {
   return {
     name: `link_fund:${code}`,
+    validate(data) {
+      return true;
+    },
     execute: async () => {
       const timestamp = Date.now();
       const t = generateV4Timestamp(String(timestamp));

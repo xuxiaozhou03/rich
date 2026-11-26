@@ -1,5 +1,5 @@
 import { prisma } from "@rich/db";
-import { run } from "./run";
+import { run } from ".";
 
 function printUsage(): void {
   console.log(

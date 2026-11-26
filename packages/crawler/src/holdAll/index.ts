@@ -1,10 +1,12 @@
 import { Holding, prisma } from "@rich/db";
-import { fetchCheeseApi, generateV4Timestamp } from "../utils/fetchCheeseApi";
-import { RunTaskOptions } from "../utils/runTask";
+import { TaskOptions, generateV4Timestamp, fetchCheeseApi } from "@rich/utils";
 
-export const getHoldAllTask = (code: string): RunTaskOptions<Holding[]> => {
+export const getHoldAllTask = (code: string): TaskOptions<Holding[]> => {
   return {
     name: `hold_all:${code}`,
+    validate(data) {
+      return true;
+    },
     execute: async () => {
       const timestamp = Date.now();
       const t = generateV4Timestamp(String(timestamp));

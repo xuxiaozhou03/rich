@@ -1,10 +1,12 @@
 import { Sw, prisma } from "@rich/db";
-import { fetchCheeseApi, generateV4Timestamp } from "../utils/fetchCheeseApi";
-import { RunTaskOptions } from "../utils/runTask";
+import { TaskOptions, generateV4Timestamp, fetchCheeseApi } from "@rich/utils";
 
-export const getSwTask = (indexCode: string): RunTaskOptions<Sw[]> => {
+export const getSwTask = (indexCode: string): TaskOptions<Sw[]> => {
   return {
     name: `sw:${indexCode}`,
+    validate(data) {
+      return true;
+    },
     execute: async () => {
       const timestamp = Date.now();
       const t = generateV4Timestamp(String(timestamp));

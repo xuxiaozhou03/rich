@@ -1,10 +1,11 @@
 import { prisma } from "@rich/db";
-import { isExpiredSuccess } from "./calendar/tradingCalendar";
+import { isExpiredSuccess } from "../tradingCalendar/tradingCalendar";
 
-export interface RunTaskOptions<T = any> {
+export interface TaskOptions<T = any> {
   name: string;
   execute: () => Promise<T>;
   persist: (data: T) => Promise<void>;
+  validate: (data: T) => boolean;
 }
 
 function logTask(name: string, message: string): void {
@@ -31,7 +32,7 @@ async function record(
  * 交易日判断，因此空库或上一交易日未同步时会在周末/节假日补跑。
  * 失败（含接口成功但没数据）会记下原因并在下次运行时重试。
  */
-export async function runTask<T = any>(options: RunTaskOptions<T>) {
+export async function runTask<T = any>(options: TaskOptions<T>) {
   const name = options.name;
 
   const done = await prisma.task.findUnique({
@@ -55,7 +56,7 @@ export async function runTask<T = any>(options: RunTaskOptions<T>) {
   }
 }
 
-export const runTasks = async (options: RunTaskOptions<any>[]) => {
+export const runTasks = async (options: TaskOptions<any>[]) => {
   for await (const option of options) {
     await runTask(option);
     await new Promise((resolve) =>

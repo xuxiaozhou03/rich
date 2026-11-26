@@ -1,5 +1,5 @@
 import { prisma, Valuation } from "@rich/db";
-import { RunTaskOptions } from "../utils/runTask";
+import { TaskOptions } from "@rich/utils";
 
 const valuationTypes = ["PE", "PB", "PS", "DID"] as const;
 
@@ -66,11 +66,14 @@ async function fetchIndexValuation(
 
 export const getValuationTasks = (
   indexCode: string,
-): RunTaskOptions<Valuation[]>[] => {
-  return valuationTypes.map<RunTaskOptions>((type) => {
+): TaskOptions<Valuation[]>[] => {
+  return valuationTypes.map<TaskOptions>((type) => {
     return {
       name: `index${indexCode}:${type}`,
       execute: () => fetchIndexValuation(indexCode, type),
+      validate(data) {
+        return true;
+      },
       async persist(data) {
         await prisma.$transaction(async (tx) => {
           await tx.valuation.deleteMany({

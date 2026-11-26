@@ -1,11 +1,11 @@
 import { prisma } from "@rich/db";
 import { etfsTask } from "./etfs";
-import { runTask, RunTaskOptions, runTasks } from "./utils/runTask";
 import { getHoldAllTask } from "./holdAll";
 import { getLinkFundTask } from "./links";
 import { getKlineTask } from "./klines";
 import { getSwTask } from "./sw";
 import { getValuationTasks } from "./valuation";
+import { runTask, TaskOptions, runTasks } from "@rich/utils";
 
 /** --dev 只跑前几只 ETF，方便本地调试时不用等全量。 */
 const DEV_CODE_LIMIT = 2;
@@ -31,7 +31,7 @@ export async function run(dev: boolean): Promise<void> {
       getLinkFundTask(code, etfCodes),
       getKlineTask(code),
     ],
-    [] as RunTaskOptions[],
+    [] as TaskOptions[],
   );
   await runTasks(etfTasks);
 
@@ -42,21 +42,7 @@ export async function run(dev: boolean): Promise<void> {
       getSwTask(indexCode),
       ...getValuationTasks(indexCode),
     ],
-    [] as RunTaskOptions[],
+    [] as TaskOptions[],
   );
   await runTasks(indexTasks);
-
-  //   const trackIndexes = await getTrackIndexes();
-  //   for (const indexCode of dev
-  //     ? trackIndexes.slice(0, DEV_CODE_LIMIT)
-  //     : trackIndexes) {
-  //     await syncPepb(indexCode);
-  //     await syncSwMap(indexCode);
-  //   }
-
-  //   for (const code of dev ? codes.slice(0, DEV_CODE_LIMIT) : codes) {
-  //     await syncLinkFund(code, codes);
-  //     await syncHoldAll(code);
-  //     await syncDayKv2(code);
-  //   }
 }
