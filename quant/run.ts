@@ -1,5 +1,5 @@
 import { prisma } from "@/shared";
-import { runCrawler } from ".";
+import { runCrawler } from "./crawler";
 
 function printUsage(): void {
   console.log(
