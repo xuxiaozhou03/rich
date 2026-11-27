@@ -1,6 +1,6 @@
 import { prisma, runTask, runTasks, TaskOptions } from "@/shared";
 import { etfsTask } from "./etfs";
-import { getHoldAllTask } from "./holdAll";
+import { getHoldAllTask } from "./holding";
 import { getKlineTask } from "./klines";
 import { getLinkFundTask } from "./links";
 import { getSwTask } from "./sw";

@@ -13,16 +13,17 @@ model Etf {
   name        String
   indexCode   String
   indexName   String?
+  // 只有最新的溢价率
   premiumRate Float?
   // 分类
   category    String
-
-  scale Float
+  // 只有最新的规模
+  scale       Float
 
   @@map("etfs")
 }
 
-/// ETF关联关系
+/// ETF关联关系（只有最新，没有历史上）
 model Link {
   target  String
   source  String
@@ -32,7 +33,7 @@ model Link {
   @@map("links")
 }
 
-/// ETF持仓
+/// ETF持仓（只有最新，没有历史上）
 model Holding {
   code      String
   stockCode String
@@ -76,7 +77,7 @@ model Valuation {
   @@map("valuations")
 }
 
-/// 指数申万行业权重：level 1 / 2 / 3
+/// 指数申万行业权重：level 1 / 2 / 3（只有最新，没有历史上）
 model Sw {
   indexCode    String
   level        Int
